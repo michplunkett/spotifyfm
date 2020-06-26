@@ -1,7 +1,14 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	
+	"github.com/michplunkett/spotifyfm/config"
+)
 
 func main() {
-	fmt.Println("oh hai")
+	envVarCtrl := config.NewEnvVarController()
+	envVarCtrl.Init()
+	fmt.Println(envVarCtrl.GetLastFMConfig())
+	fmt.Println(envVarCtrl.GetSpotifyConfig())
 }
