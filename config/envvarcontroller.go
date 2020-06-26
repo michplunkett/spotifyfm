@@ -38,24 +38,23 @@ func NewEnvVarController() EnvVarController {
 func (e *envVarController) Init() error {
 	lastFmEnvVars := []string{os.Getenv(utility.LastFMApiKey), os.Getenv(utility.LastFMSharedSecret)}
 	if utility.ArrayHasNoEmptyStrings(lastFmEnvVars) {
+		e.lastFmConfigObj = &LastFmConfig{
+			apiKey:       lastFmEnvVars[0],
+			sharedSecret: lastFmEnvVars[1],
+		}
+	} else {
 		return fmt.Errorf("one of the last.fm environment variables is not present in your system")
-	}
-
-	e.lastFmConfigObj = &LastFmConfig{
-		apiKey:       lastFmEnvVars[0],
-		sharedSecret: lastFmEnvVars[1],
 	}
 
 	spotifyEnvVars := []string{os.Getenv(utility.SpotifyClientID), os.Getenv(utility.SpotifyClientSecret), os.Getenv(utility.SpotifyUserName)}
 	if utility.ArrayHasNoEmptyStrings(spotifyEnvVars) {
+		e.spotifyConfigObj = &SpotifyConfig{
+			clientID:     spotifyEnvVars[0],
+			clientSecret: spotifyEnvVars[1],
+			userName:     spotifyEnvVars[2],
+		}
+	} else {
 		return fmt.Errorf("one of the spotify environment variables is not present in your system")
-	}
-
-
-	e.spotifyConfigObj = &SpotifyConfig{
-		clientID:     spotifyEnvVars[0],
-		clientSecret: spotifyEnvVars[1],
-		userName:     spotifyEnvVars[2],
 	}
 
 	return nil

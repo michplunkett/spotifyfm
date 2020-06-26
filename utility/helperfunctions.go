@@ -8,9 +8,9 @@ type HelperFunctions interface {
 func ArrayHasNoEmptyStrings(envVars []string) bool {
 	for _, value := range envVars {
 		if value == EmptyString {
-			return true
+			return false
 		}
 	}
 
-	return false
+	return true
 }
