@@ -1,14 +1,13 @@
 package main
 
-import (
-	"fmt"
-
-	"github.com/michplunkett/spotifyfm/config"
-)
+import "github.com/michplunkett/spotifyfm/api/authentication"
 
 func main() {
-	envVarCtrl := config.NewEnvVarController()
-	envVarCtrl.Init()
-	fmt.Println(envVarCtrl.GetLastFMConfig())
-	fmt.Println(envVarCtrl.GetSpotifyConfig())
+	spotifyProfileHandler := authentication.NewSpotifyAuthHandlerProfile()
+	spotifyProfileHandler.Authenticate()
+
+	//lastFMConfig := config.NewEnvVarController()
+	//lastFMConfig.Init()
+	//lastFMHandler := authentication.NewLastFMAuthHandler(lastFMConfig.GetLastFMConfig())
+	//lastFMHandler.Authenticate()
 }

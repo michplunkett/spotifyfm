@@ -5,13 +5,13 @@ import (
 	"os"
 
 	"github.com/michplunkett/spotifyfm/utility"
-	)
+)
 
 // EnvironmentVariableController will handle creating and handling all fo the configs
 type EnvVarController interface {
-	Init() error
-	GetLastFMConfig() (*LastFmConfig, error)
-	GetSpotifyConfig() (*SpotifyConfig, error)
+	Init()
+	GetLastFMConfig() *LastFmConfig
+	GetSpotifyConfig() *SpotifyConfig
 }
 
 type LastFmConfig struct {
@@ -26,7 +26,7 @@ type SpotifyConfig struct {
 }
 
 type envVarController struct {
-	lastFmConfigObj *LastFmConfig
+	lastFmConfigObj  *LastFmConfig
 	spotifyConfigObj *SpotifyConfig
 }
 
@@ -35,7 +35,7 @@ func NewEnvVarController() EnvVarController {
 }
 
 // Init creates the two variables that will be exported in the GetLastFMConfig and GetSpotifyConfig functions
-func (e *envVarController) Init() error {
+func (e *envVarController) Init() {
 	lastFmEnvVars := []string{os.Getenv(utility.LastFMApiKey), os.Getenv(utility.LastFMSharedSecret)}
 	if utility.ArrayHasNoEmptyStrings(lastFmEnvVars) {
 		e.lastFmConfigObj = &LastFmConfig{
@@ -43,7 +43,7 @@ func (e *envVarController) Init() error {
 			sharedSecret: lastFmEnvVars[1],
 		}
 	} else {
-		return fmt.Errorf("one of the last.fm environment variables is not present in your system")
+		fmt.Errorf("one of the last.fm environment variables is not present in your system")
 	}
 
 	spotifyEnvVars := []string{os.Getenv(utility.SpotifyClientID), os.Getenv(utility.SpotifyClientSecret), os.Getenv(utility.SpotifyUserName)}
@@ -54,18 +54,16 @@ func (e *envVarController) Init() error {
 			userName:     spotifyEnvVars[2],
 		}
 	} else {
-		return fmt.Errorf("one of the spotify environment variables is not present in your system")
+		fmt.Errorf("one of the spotify environment variables is not present in your system")
 	}
-
-	return nil
 }
 
-func (e *envVarController) GetLastFMConfig() (*LastFmConfig, error) {
-	return e.lastFmConfigObj, nil
+func (e *envVarController) GetLastFMConfig() *LastFmConfig {
+	return e.lastFmConfigObj
 }
 
-func (e *envVarController) GetSpotifyConfig() (*SpotifyConfig, error) {
-	return e.spotifyConfigObj, nil
+func (e *envVarController) GetSpotifyConfig() *SpotifyConfig {
+	return e.spotifyConfigObj
 }
 
 func (config *LastFmConfig) GetApiKey() string {
