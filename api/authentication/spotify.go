@@ -72,18 +72,27 @@ func (handler *spotifyAuthHandler) Authenticate() *spotify.Client {
 	http.HandleFunc("/spotify-callback", handler.finishAuthentication)
 
 	authRequestUrl := handler.auth.AuthURL(handler.state)
-	fmt.Println("Opening the Spotify authorization URL in your browser:", authRequestUrl)
+	//fmt.Println("Opening the Spotify authorization URL in your browser:", authRequestUrl)
 	browser.OpenURL(authRequestUrl)
 
 	// wait for auth to complete
 	client := <-handler.ch
 
+	fmt.Println("---------------------")
+	fmt.Println("SPOTIFY THANGS")
+
 	// use the client to make calls that require authorization
-	user, err := client.CurrentUser()
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println("You are logged in as:", user.DisplayName)
+	user, _ := client.CurrentUser()
+	fmt.Println("You are logged in as ", user.DisplayName)
+
+	var numOfTracksToPull = 50
+	// short_term (approximately last 4 weeks)
+	var timeRange = "short"
+	topTracks, _ := client.CurrentUsersTopTracksOpt(&spotify.Options{
+		Limit: &numOfTracksToPull,
+		Timerange: &timeRange,
+	})
+	fmt.Println("This is your top track ", topTracks.Tracks[0].SimpleTrack.Name)
 
 	return client
 }
