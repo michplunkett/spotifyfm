@@ -30,7 +30,7 @@ type spotifyAuthHandler struct {
 func NewSpotifyAuthHandlerProfile() SpotifyAuthHandler {
 	state, _ := utility.GenerateRandomString(23)
 	return &spotifyAuthHandler{
-		auth: spotify.NewAuthenticator(utility.RedirectURL, spotify.ScopeUserFollowRead,
+		auth: spotify.NewAuthenticator(utility.SpotifyRedirectURL, spotify.ScopeUserFollowRead,
 			spotify.ScopeUserReadPrivate, spotify.ScopeUserReadEmail),
 		ch:    make(chan *spotify.Client),
 		state: state,
@@ -40,7 +40,7 @@ func NewSpotifyAuthHandlerProfile() SpotifyAuthHandler {
 func NewSpotifyAuthHandlerMusicStorage() SpotifyAuthHandler {
 	state, _ := utility.GenerateRandomString(23)
 	return &spotifyAuthHandler{
-		auth: spotify.NewAuthenticator(utility.RedirectURL, spotify.ScopePlaylistReadPrivate,
+		auth: spotify.NewAuthenticator(utility.SpotifyRedirectURL, spotify.ScopePlaylistReadPrivate,
 			spotify.ScopePlaylistReadCollaborative, spotify.ScopeUserLibraryRead),
 		ch:    make(chan *spotify.Client),
 		state: state,
@@ -50,7 +50,7 @@ func NewSpotifyAuthHandlerMusicStorage() SpotifyAuthHandler {
 func NewSpotifyAuthHandlerActivity() SpotifyAuthHandler {
 	state, _ := utility.GenerateRandomString(23)
 	return &spotifyAuthHandler{
-		auth: spotify.NewAuthenticator(utility.RedirectURL, spotify.ScopeUserTopRead, spotify.ScopeUserReadRecentlyPlayed,
+		auth: spotify.NewAuthenticator(utility.SpotifyRedirectURL, spotify.ScopeUserTopRead, spotify.ScopeUserReadRecentlyPlayed,
 			spotify.ScopeUserReadCurrentlyPlaying),
 		ch:    make(chan *spotify.Client),
 		state: state,
@@ -59,11 +59,7 @@ func NewSpotifyAuthHandlerActivity() SpotifyAuthHandler {
 
 func (handler *spotifyAuthHandler) Authenticate() *spotify.Client {
 	// first start an HTTP server
-	http.HandleFunc("/callback", handler.finishAuthentication)
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		log.Println("Got request for:", r.URL.String())
-	})
-	go http.ListenAndServe(":8080", nil)
+	http.HandleFunc("/spotify-callback", handler.finishAuthentication)
 
 	authRequestUrl := handler.auth.AuthURL(handler.state)
 	fmt.Println("Opening the Spotify authorization URL in your browser:", authRequestUrl)

@@ -33,12 +33,8 @@ func NewLastFMAuthHandler(config *config.LastFmConfig) LastFMAuthHandler {
 }
 
 func (handler *lastFMAuthHandler) Authenticate() *lastfm.Api {
-	http.HandleFunc("/callback", handler.finishAuthentication)
-	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		log.Println("Got request for:", r.URL.String())
-	})
-	go http.ListenAndServe(":8080", nil)
-	authRequestUrl := handler.api.GetAuthRequestUrl(utility.RedirectURL)
+	http.HandleFunc("/lastfm-callback", handler.finishAuthentication)
+	authRequestUrl := handler.api.GetAuthRequestUrl(utility.LastFMRedirectURL)
 
 	fmt.Println("Opening the LastFM authorization URL in your browser:", authRequestUrl)
 	browser.OpenURL(authRequestUrl)
