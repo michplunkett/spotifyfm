@@ -27,34 +27,44 @@ type spotifyAuthHandler struct {
 	state string
 }
 
-func NewSpotifyAuthHandlerProfile() SpotifyAuthHandler {
+func newSpotifyAuthHandlerGeneric(permissions []string) SpotifyAuthHandler {
 	state, _ := utility.GenerateRandomString(23)
 	return &spotifyAuthHandler{
-		auth: spotify.NewAuthenticator(utility.SpotifyRedirectURL, spotify.ScopeUserFollowRead,
-			spotify.ScopeUserReadPrivate, spotify.ScopeUserReadEmail),
+		auth: spotify.NewAuthenticator(utility.SpotifyRedirectURL, permissions...),
 		ch:    make(chan *spotify.Client),
 		state: state,
 	}
+}
+
+func NewSpotifyAuthHandlerAll() SpotifyAuthHandler {
+	var permissions = make([]string, 0)
+	permissions = append(permissions, spotify.ScopeUserFollowRead,
+		spotify.ScopeUserReadPrivate, spotify.ScopeUserReadEmail,
+		spotify.ScopePlaylistReadPrivate, spotify.ScopePlaylistReadCollaborative,
+		spotify.ScopeUserLibraryRead, spotify.ScopeUserTopRead,
+		spotify.ScopeUserReadRecentlyPlayed, spotify.ScopeUserReadCurrentlyPlaying)
+	return newSpotifyAuthHandlerGeneric(permissions)
+}
+
+func NewSpotifyAuthHandlerProfile() SpotifyAuthHandler {
+	var permissions = make([]string, 0)
+	permissions = append(permissions, spotify.ScopeUserFollowRead,
+		spotify.ScopeUserReadPrivate, spotify.ScopeUserReadEmail)
+	return newSpotifyAuthHandlerGeneric(permissions)
 }
 
 func NewSpotifyAuthHandlerMusicStorage() SpotifyAuthHandler {
-	state, _ := utility.GenerateRandomString(23)
-	return &spotifyAuthHandler{
-		auth: spotify.NewAuthenticator(utility.SpotifyRedirectURL, spotify.ScopePlaylistReadPrivate,
-			spotify.ScopePlaylistReadCollaborative, spotify.ScopeUserLibraryRead),
-		ch:    make(chan *spotify.Client),
-		state: state,
-	}
+	var permissions = make([]string, 0)
+	permissions = append(permissions, spotify.ScopePlaylistReadPrivate,
+		spotify.ScopePlaylistReadCollaborative, spotify.ScopeUserLibraryRead)
+	return newSpotifyAuthHandlerGeneric(permissions)
 }
 
 func NewSpotifyAuthHandlerActivity() SpotifyAuthHandler {
-	state, _ := utility.GenerateRandomString(23)
-	return &spotifyAuthHandler{
-		auth: spotify.NewAuthenticator(utility.SpotifyRedirectURL, spotify.ScopeUserTopRead, spotify.ScopeUserReadRecentlyPlayed,
-			spotify.ScopeUserReadCurrentlyPlaying),
-		ch:    make(chan *spotify.Client),
-		state: state,
-	}
+	var permissions = make([]string, 0)
+	permissions = append(permissions, spotify.ScopeUserTopRead, spotify.ScopeUserReadRecentlyPlayed,
+		spotify.ScopeUserReadCurrentlyPlaying)
+	return newSpotifyAuthHandlerGeneric(permissions)
 }
 
 func (handler *spotifyAuthHandler) Authenticate() *spotify.Client {
@@ -73,7 +83,7 @@ func (handler *spotifyAuthHandler) Authenticate() *spotify.Client {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("You are logged in as:", user.Followers)
+	fmt.Println("You are logged in as:", user.DisplayName)
 
 	return client
 }

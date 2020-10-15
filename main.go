@@ -15,13 +15,12 @@ func main() {
 	})
 	go http.ListenAndServe(":8080", nil)
 
-	spotifyProfileHandler := authentication.NewSpotifyAuthHandlerProfile()
+	spotifyProfileHandler := authentication.NewSpotifyAuthHandlerAll()
 	spotifyProfileHandler.Authenticate()
 
 	lastFMConfig := config.NewEnvVarController()
 	lastFMConfig.Init()
 	lastFMHandler := authentication.NewLastFMAuthHandler(lastFMConfig.GetLastFMConfig())
 	lastFMHandler.Authenticate()
-
 
 }
