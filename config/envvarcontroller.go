@@ -3,8 +3,6 @@ package config
 import (
 	"fmt"
 	"os"
-
-	"github.com/michplunkett/spotifyfm/utility"
 )
 
 // EnvironmentVariableController will handle creating and handling all fo the configs
@@ -36,8 +34,8 @@ func NewEnvVarController() EnvVarController {
 
 // Init creates the two variables that will be exported in the GetLastFMConfig and GetSpotifyConfig functions
 func (e *envVarController) Init() {
-	lastFmEnvVars := []string{os.Getenv(utility.LastFMApiKey), os.Getenv(utility.LastFMSharedSecret)}
-	if utility.ArrayHasNoEmptyStrings(lastFmEnvVars) {
+	lastFmEnvVars := []string{os.Getenv(LastFMApiKey), os.Getenv(LastFMSharedSecret)}
+	if arrayHasNoEmptyStrings(lastFmEnvVars) {
 		e.lastFmConfigObj = &LastFmConfig{
 			apiKey:       lastFmEnvVars[0],
 			sharedSecret: lastFmEnvVars[1],
@@ -46,8 +44,8 @@ func (e *envVarController) Init() {
 		fmt.Errorf("one of the last.fm environment variables is not present in your system")
 	}
 
-	spotifyEnvVars := []string{os.Getenv(utility.SpotifyClientID), os.Getenv(utility.SpotifyClientSecret), os.Getenv(utility.SpotifyUserName)}
-	if utility.ArrayHasNoEmptyStrings(spotifyEnvVars) {
+	spotifyEnvVars := []string{os.Getenv(SpotifyClientID), os.Getenv(SpotifyClientSecret), os.Getenv(SpotifyUserName)}
+	if arrayHasNoEmptyStrings(spotifyEnvVars) {
 		e.spotifyConfigObj = &SpotifyConfig{
 			clientID:     spotifyEnvVars[0],
 			clientSecret: spotifyEnvVars[1],
@@ -84,4 +82,14 @@ func (config *SpotifyConfig) GetClientSecret() string {
 
 func (config *SpotifyConfig) GetUserName() string {
 	return config.userName
+}
+
+func arrayHasNoEmptyStrings(envVars []string) bool {
+	for _, value := range envVars {
+		if value == EmptyString {
+			return false
+		}
+	}
+
+	return true
 }

@@ -1,7 +1,6 @@
 package authentication
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"net/url"
@@ -10,7 +9,6 @@ import (
 	"github.com/shkh/lastfm-go/lastfm"
 
 	"github.com/michplunkett/spotifyfm/config"
-	"github.com/michplunkett/spotifyfm/utility"
 )
 
 type LastFMAuthHandler interface {
@@ -34,7 +32,7 @@ func NewLastFMAuthHandler(config *config.LastFmConfig) LastFMAuthHandler {
 
 func (handler *lastFMAuthHandler) Authenticate() *lastfm.Api {
 	http.HandleFunc("/lastfm-callback", handler.finishAuthentication)
-	authRequestUrl := handler.api.GetAuthRequestUrl(utility.LastFMRedirectURL)
+	authRequestUrl := handler.api.GetAuthRequestUrl(config.LastFMRedirectURL)
 
 	//fmt.Println("Opening the LastFM authorization URL in your browser:", authRequestUrl)
 	browser.OpenURL(authRequestUrl)
@@ -43,19 +41,6 @@ func (handler *lastFMAuthHandler) Authenticate() *lastfm.Api {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	fmt.Println("---------------------")
-	fmt.Println("LAST.FM THANGS")
-
-	userInfo, _ := handler.api.User.GetInfo(nil)
-	fmt.Println("You are logged in as ", userInfo.RealName)
-
-	topTracksParam := make(map[string]interface{})
-	topTracksParam["user"] = userInfo.Name
-	topTracksParam["limit"] = 50
-	topTracksParam["period"] = "1month"
-	topTracks, _ := handler.api.User.GetTopTracks(topTracksParam)
-	fmt.Println("This is your top track ", topTracks.Tracks[0].Name)
 
 	return handler.api
 }

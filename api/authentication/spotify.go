@@ -1,6 +1,8 @@
 package authentication
 
 import (
+	"crypto/rand"
+	"encoding/base64"
 	"fmt"
 	"log"
 	"net/http"
@@ -9,7 +11,6 @@ import (
 	"github.com/zmb3/spotify"
 
 	"github.com/michplunkett/spotifyfm/config"
-	"github.com/michplunkett/spotifyfm/utility"
 )
 
 type spotifyAPI struct {
@@ -28,9 +29,9 @@ type spotifyAuthHandler struct {
 }
 
 func newSpotifyAuthHandlerGeneric(permissions []string) SpotifyAuthHandler {
-	state, _ := utility.GenerateRandomString(23)
+	state, _ := generateRandomString(23)
 	return &spotifyAuthHandler{
-		auth: spotify.NewAuthenticator(utility.SpotifyRedirectURL, permissions...),
+		auth:  spotify.NewAuthenticator(config.SpotifyRedirectURL, permissions...),
 		ch:    make(chan *spotify.Client),
 		state: state,
 	}
@@ -72,27 +73,10 @@ func (handler *spotifyAuthHandler) Authenticate() *spotify.Client {
 	http.HandleFunc("/spotify-callback", handler.finishAuthentication)
 
 	authRequestUrl := handler.auth.AuthURL(handler.state)
-	//fmt.Println("Opening the Spotify authorization URL in your browser:", authRequestUrl)
 	browser.OpenURL(authRequestUrl)
 
 	// wait for auth to complete
 	client := <-handler.ch
-
-	fmt.Println("---------------------")
-	fmt.Println("SPOTIFY THANGS")
-
-	// use the client to make calls that require authorization
-	user, _ := client.CurrentUser()
-	fmt.Println("You are logged in as ", user.DisplayName)
-
-	var numOfTracksToPull = 50
-	// short_term (approximately last 4 weeks)
-	var timeRange = "short"
-	topTracks, _ := client.CurrentUsersTopTracksOpt(&spotify.Options{
-		Limit: &numOfTracksToPull,
-		Timerange: &timeRange,
-	})
-	fmt.Println("This is your top track ", topTracks.Tracks[0].SimpleTrack.Name)
 
 	return client
 }
@@ -111,4 +95,19 @@ func (handler *spotifyAuthHandler) finishAuthentication(w http.ResponseWriter, r
 	client := handler.auth.NewClient(tok)
 	fmt.Fprintf(w, "Login Completed!")
 	handler.ch <- &client
+}
+
+func generateRandomString(s int) (string, error) {
+	b, err := generateRandomBytes(s)
+	return base64.URLEncoding.EncodeToString(b), err
+}
+
+func generateRandomBytes(n int) ([]byte, error) {
+	b := make([]byte, n)
+	_, err := rand.Read(b)
+	if err != nil {
+		return nil, err
+	}
+
+	return b, nil
 }
