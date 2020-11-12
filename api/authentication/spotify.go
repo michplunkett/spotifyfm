@@ -13,10 +13,6 @@ import (
 	"github.com/michplunkett/spotifyfm/config"
 )
 
-type spotifyAPI struct {
-	spotifyConfig *config.SpotifyConfig
-}
-
 type SpotifyAuthHandler interface {
 	Authenticate() *spotify.Client
 	finishAuthentication(w http.ResponseWriter, r *http.Request)
