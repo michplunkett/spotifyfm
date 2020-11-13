@@ -31,7 +31,8 @@ func NewLastFMAuthHandler(e config.EnvVars) LastFMAuthHandler {
 }
 
 func (handler *lastFMAuthHandler) Authenticate() *lastfm.Api {
-	if handler.config.GetLastFMSessionKey() != "" {
+	// it's a non-empty string check because last.fm auth lasts FOREVER
+	if handler.config.GetLastFMSessionKey() != config.EmptyString {
 		handler.api.SetSession(handler.config.GetLastFMSessionKey())
 	} else {
 		http.HandleFunc("/lastfm-callback", handler.finishAuthentication)
