@@ -19,27 +19,33 @@ type LastFMAuthHandler interface {
 var channelErr = make(chan error)
 
 type lastFMAuthHandler struct {
-	api    *lastfm.Api
-	key    string
-	secret string
+	api           *lastfm.Api
+	generalConfig config.EnvVars
 }
 
-func NewLastFMAuthHandler(config *config.LastFmConfig) LastFMAuthHandler {
+func NewLastFMAuthHandler(e config.EnvVars) LastFMAuthHandler {
 	return &lastFMAuthHandler{
-		api: lastfm.New(config.GetApiKey(), config.GetSharedSecret()),
+		api:           lastfm.New(e.GetLastFMApiKey(), e.GetLastFMSharedSecret()),
+		generalConfig: e,
 	}
 }
 
 func (handler *lastFMAuthHandler) Authenticate() *lastfm.Api {
-	http.HandleFunc("/lastfm-callback", handler.finishAuthentication)
-	authRequestUrl := handler.api.GetAuthRequestUrl(config.LastFMRedirectURL)
+	if handler.generalConfig.GetLastFMSessionKey() != "" {
+		handler.api.SetSession(handler.generalConfig.GetLastFMSessionKey())
+	} else {
+		http.HandleFunc("/lastfm-callback", handler.finishAuthentication)
+		authRequestUrl := handler.api.GetAuthRequestUrl(config.LastFMRedirectURL)
 
-	//fmt.Println("Opening the LastFM authorization URL in your browser:", authRequestUrl)
-	browser.OpenURL(authRequestUrl)
+		//fmt.Println("Opening the LastFM authorization URL in your browser:", authRequestUrl)
+		browser.OpenURL(authRequestUrl)
 
-	err := <-channelErr
-	if err != nil {
-		log.Fatal(err)
+		err := <-channelErr
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		handler.generalConfig.SetLastFMSessionKey(handler.api.GetSessionKey())
 	}
 
 	return handler.api
