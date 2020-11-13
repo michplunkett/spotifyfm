@@ -27,8 +27,14 @@ func main() {
 	spotifyUser := spotifyHandler.GetUserInfo()
 	fmt.Println("You are logged in as ", spotifyUser.DisplayName)
 
+	spotifyCurrentlyPlaying := spotifyHandler.GetCurrentlyPlaying()
+	fmt.Println("This is the track you're currently playing ", spotifyCurrentlyPlaying.Item.Name)
+
 	spotifyTopTracks := spotifyHandler.GetTopTracks(config.SpotifyPeriodShort, 50)
-	fmt.Println("This is your top track ", spotifyTopTracks.Tracks[0].SimpleTrack)
+	fmt.Println("This is your top track ", spotifyTopTracks.Tracks[0].SimpleTrack.Name)
+
+	spotifyTopArtists := spotifyHandler.GetTopArtists(config.SpotifyPeriodShort, 50)
+	fmt.Println("This is your top artist ", spotifyTopArtists.Artists[0].Name)
 
 	lastFMAuth := authentication.NewLastFMAuthHandler(envVars)
 	lastFMClient := lastFMAuth.Authenticate()
@@ -40,6 +46,12 @@ func main() {
 	lastFMUser := lastFMHandler.GetUserInfo()
 	fmt.Println("You are logged in as ", lastFMUser.RealName)
 
+	lastFMCurrentlyPlaying := lastFMHandler.GetCurrentTrack(lastFMUser.Name, 1)
+	fmt.Println("This is the track you're currently playing ", lastFMCurrentlyPlaying.Tracks[0].Name)
+
 	lastFMTopTracks := lastFMHandler.GetTopTracks(lastFMUser.Name, 50, config.LastFMPeriod1Month)
 	fmt.Println("This is your top track ", lastFMTopTracks.Tracks[0].Name)
+
+	lastFMTopArtists := lastFMHandler.GetTopArtists(lastFMUser.Name, 50, config.LastFMPeriod1Month)
+	fmt.Println("This is your top artist ", lastFMTopArtists.Artists[0].Name)
 }
