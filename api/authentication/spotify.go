@@ -4,8 +4,10 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"fmt"
+	"golang.org/x/oauth2"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/pkg/browser"
 	"github.com/zmb3/spotify"
@@ -15,66 +17,80 @@ import (
 
 type SpotifyAuthHandler interface {
 	Authenticate() *spotify.Client
-	finishAuthentication(w http.ResponseWriter, r *http.Request)
 }
 
 type spotifyAuthHandler struct {
-	auth  spotify.Authenticator
-	ch    chan *spotify.Client
-	state string
+	auth   spotify.Authenticator
+	ch     chan *spotify.Client
+	config config.EnvVars
+	state  string
 }
 
-func newSpotifyAuthHandlerGeneric(permissions []string) SpotifyAuthHandler {
+func newSpotifyAuthHandlerGeneric(permissions []string, e config.EnvVars) SpotifyAuthHandler {
 	state, _ := generateRandomString(23)
 	return &spotifyAuthHandler{
-		auth:  spotify.NewAuthenticator(config.SpotifyRedirectURL, permissions...),
-		ch:    make(chan *spotify.Client),
-		state: state,
+		auth:   spotify.NewAuthenticator(config.SpotifyRedirectURL, permissions...),
+		ch:     make(chan *spotify.Client),
+		config: e,
+		state:  state,
 	}
 }
 
-func NewSpotifyAuthHandlerAll() SpotifyAuthHandler {
+func NewSpotifyAuthHandlerAll(e config.EnvVars) SpotifyAuthHandler {
 	var permissions = make([]string, 0)
 	permissions = append(permissions, spotify.ScopeUserFollowRead,
 		spotify.ScopeUserReadPrivate, spotify.ScopeUserReadEmail,
 		spotify.ScopePlaylistReadPrivate, spotify.ScopePlaylistReadCollaborative,
 		spotify.ScopeUserLibraryRead, spotify.ScopeUserTopRead,
 		spotify.ScopeUserReadRecentlyPlayed, spotify.ScopeUserReadCurrentlyPlaying)
-	return newSpotifyAuthHandlerGeneric(permissions)
+	return newSpotifyAuthHandlerGeneric(permissions, e)
 }
 
-func NewSpotifyAuthHandlerProfile() SpotifyAuthHandler {
+func NewSpotifyAuthHandlerProfile(e config.EnvVars) SpotifyAuthHandler {
 	var permissions = make([]string, 0)
 	permissions = append(permissions, spotify.ScopeUserFollowRead,
 		spotify.ScopeUserReadPrivate, spotify.ScopeUserReadEmail)
-	return newSpotifyAuthHandlerGeneric(permissions)
+	return newSpotifyAuthHandlerGeneric(permissions, e)
 }
 
-func NewSpotifyAuthHandlerMusicStorage() SpotifyAuthHandler {
+func NewSpotifyAuthHandlerMusicStorage(e config.EnvVars) SpotifyAuthHandler {
 	var permissions = make([]string, 0)
 	permissions = append(permissions, spotify.ScopePlaylistReadPrivate,
 		spotify.ScopePlaylistReadCollaborative, spotify.ScopeUserLibraryRead)
-	return newSpotifyAuthHandlerGeneric(permissions)
+	return newSpotifyAuthHandlerGeneric(permissions, e)
 }
 
-func NewSpotifyAuthHandlerActivity() SpotifyAuthHandler {
+func NewSpotifyAuthHandlerActivity(e config.EnvVars) SpotifyAuthHandler {
 	var permissions = make([]string, 0)
 	permissions = append(permissions, spotify.ScopeUserTopRead, spotify.ScopeUserReadRecentlyPlayed,
 		spotify.ScopeUserReadCurrentlyPlaying)
-	return newSpotifyAuthHandlerGeneric(permissions)
+	return newSpotifyAuthHandlerGeneric(permissions, e)
 }
 
 func (handler *spotifyAuthHandler) Authenticate() *spotify.Client {
-	// first start an HTTP server
-	http.HandleFunc("/spotify-callback", handler.finishAuthentication)
+	expirationTime := handler.config.GetSpotifyTokenExpiration()
+	if !expirationTime.IsZero() && expirationTime.After(time.Now()) {
+		token := &oauth2.Token{
+			AccessToken:  handler.config.GetSpotifyToken(),
+			TokenType:    "Bearer",
+			RefreshToken: handler.config.GetSpotifyRefreshToken(),
+			Expiry:       expirationTime,
+		}
+		client := handler.auth.NewClient(token)
 
-	authRequestUrl := handler.auth.AuthURL(handler.state)
-	browser.OpenURL(authRequestUrl)
+		return &client
+	} else {
+		// first start an HTTP server
+		http.HandleFunc("/spotify-callback", handler.finishAuthentication)
 
-	// wait for auth to complete
-	client := <-handler.ch
+		authRequestUrl := handler.auth.AuthURL(handler.state)
+		browser.OpenURL(authRequestUrl)
 
-	return client
+		// wait for auth to complete
+		client := <-handler.ch
+
+		return client
+	}
 }
 
 func (handler *spotifyAuthHandler) finishAuthentication(w http.ResponseWriter, r *http.Request) {
@@ -89,6 +105,9 @@ func (handler *spotifyAuthHandler) finishAuthentication(w http.ResponseWriter, r
 	}
 	// use the token to get an authenticated client
 	client := handler.auth.NewClient(tok)
+	safeExpiration := tok.Expiry.Add(-time.Minute * 10)
+	handler.config.SetSpotifyInfo(tok.AccessToken, tok.RefreshToken, safeExpiration)
+
 	fmt.Fprintf(w, "Login Completed!")
 	handler.ch <- &client
 }

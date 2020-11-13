@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/michplunkett/spotifyfm/models"
 )
@@ -16,18 +17,22 @@ type EnvVars interface {
 	GetSpotifyClientID() string
 	GetSpotifyClientSecret() string
 	GetSpotifyUserName() string
+	SetSpotifyInfo(token, refreshToken string, expirationTime time.Time)
+	GetSpotifyToken() string
+	SetSpotifyToken(token string)
+	GetSpotifyTokenExpiration() time.Time
+	SetSpotifyTokenExpiration(expirationTime time.Time)
+	GetSpotifyRefreshToken() string
+	SetSpotifyRefreshToken(refreshToken string)
 }
 
 type envVars struct {
-	lastfmApiKey       string
-	lastfmSharedSecret string
+	lastfmApiKey        string
+	lastfmSharedSecret  string
 	spotifyClientID     string
 	spotifyClientSecret string
-	spotifyToken        string
-	spotifyRefreshToken string
-	spotifyTokenExpiry  int16
 	spotifyUserName     string
-	fileConfigs *models.FileConfigs
+	fileConfigs         *models.FileConfigs
 }
 
 func NewEnvVars() EnvVars {
@@ -82,6 +87,40 @@ func (e *envVars) GetSpotifyClientSecret() string {
 
 func (e *envVars) GetSpotifyUserName() string {
 	return e.spotifyUserName
+}
+
+func (e *envVars) GetSpotifyToken() string {
+	return e.fileConfigs.Spotify.Token
+}
+
+func (e *envVars) SetSpotifyInfo(token, refreshToken string, expirationTime time.Time) {
+	e.fileConfigs.Spotify.Token = token
+	e.fileConfigs.Spotify.RefreshToken = refreshToken
+	e.fileConfigs.Spotify.TokenExpirationTime = expirationTime
+	e.fileConfigs.SetConfigValues()
+}
+
+func (e *envVars) SetSpotifyToken(token string) {
+	e.fileConfigs.Spotify.Token = token
+	e.fileConfigs.SetConfigValues()
+}
+
+func (e *envVars) GetSpotifyTokenExpiration() time.Time {
+	return e.fileConfigs.Spotify.TokenExpirationTime
+}
+
+func (e *envVars) SetSpotifyTokenExpiration(expirationTime time.Time) {
+	e.fileConfigs.Spotify.TokenExpirationTime = expirationTime
+	e.fileConfigs.SetConfigValues()
+}
+
+func (e *envVars) GetSpotifyRefreshToken() string {
+	return e.fileConfigs.Spotify.RefreshToken
+}
+
+func (e *envVars) SetSpotifyRefreshToken(refreshToken string) {
+	e.fileConfigs.Spotify.RefreshToken = refreshToken
+	e.fileConfigs.SetConfigValues()
 }
 
 func arrayHasNoEmptyStrings(envVars []string) bool {

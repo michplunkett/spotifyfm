@@ -16,19 +16,19 @@ func main() {
 	// Getting the environment variables
 	envVars := config.NewEnvVars()
 
-	//spotifyAuth := authentication.NewSpotifyAuthHandlerAll()
-	//spotifyClient := spotifyAuth.Authenticate()
-	//spotifyHandler := endpoints.NewSpotifyHandler(spotifyClient)
-	//
-	//fmt.Println("---------------------")
-	//fmt.Println("SPOTIFY THANGS")
-	//
-	//// use the client to make calls that require authorization
-	//spotifyUser := spotifyHandler.GetUserInfo()
-	//fmt.Println("You are logged in as ", spotifyUser.DisplayName)
-	//
-	//spotifyTopTracks := spotifyHandler.GetTopTracks(config.SpotifyPeriodShort, 50)
-	//fmt.Println("This is your top track ", spotifyTopTracks.Tracks[0].SimpleTrack)
+	spotifyAuth := authentication.NewSpotifyAuthHandlerAll(envVars)
+	spotifyClient := spotifyAuth.Authenticate()
+	spotifyHandler := endpoints.NewSpotifyHandler(spotifyClient)
+
+	fmt.Println("---------------------")
+	fmt.Println("SPOTIFY THANGS")
+
+	// use the client to make calls that require authorization
+	spotifyUser := spotifyHandler.GetUserInfo()
+	fmt.Println("You are logged in as ", spotifyUser.DisplayName)
+
+	spotifyTopTracks := spotifyHandler.GetTopTracks(config.SpotifyPeriodShort, 50)
+	fmt.Println("This is your top track ", spotifyTopTracks.Tracks[0].SimpleTrack)
 
 	lastFMAuth := authentication.NewLastFMAuthHandler(envVars)
 	lastFMClient := lastFMAuth.Authenticate()

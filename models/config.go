@@ -3,6 +3,7 @@ package models
 import (
 	"encoding/json"
 	"io/ioutil"
+	"time"
 )
 
 var (
@@ -19,10 +20,9 @@ type LastFMConfigs struct {
 }
 
 type SpotifyConfigs struct {
-	StartTime           string
 	Token               string
 	RefreshToken        string
-	TokenExpirationTime string
+	TokenExpirationTime time.Time
 }
 
 func GetConfigValues() *FileConfigs {

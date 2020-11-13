@@ -19,20 +19,20 @@ type LastFMAuthHandler interface {
 var channelErr = make(chan error)
 
 type lastFMAuthHandler struct {
-	api           *lastfm.Api
-	generalConfig config.EnvVars
+	api    *lastfm.Api
+	config config.EnvVars
 }
 
 func NewLastFMAuthHandler(e config.EnvVars) LastFMAuthHandler {
 	return &lastFMAuthHandler{
-		api:           lastfm.New(e.GetLastFMApiKey(), e.GetLastFMSharedSecret()),
-		generalConfig: e,
+		api:    lastfm.New(e.GetLastFMApiKey(), e.GetLastFMSharedSecret()),
+		config: e,
 	}
 }
 
 func (handler *lastFMAuthHandler) Authenticate() *lastfm.Api {
-	if handler.generalConfig.GetLastFMSessionKey() != "" {
-		handler.api.SetSession(handler.generalConfig.GetLastFMSessionKey())
+	if handler.config.GetLastFMSessionKey() != "" {
+		handler.api.SetSession(handler.config.GetLastFMSessionKey())
 	} else {
 		http.HandleFunc("/lastfm-callback", handler.finishAuthentication)
 		authRequestUrl := handler.api.GetAuthRequestUrl(config.LastFMRedirectURL)
@@ -45,7 +45,7 @@ func (handler *lastFMAuthHandler) Authenticate() *lastfm.Api {
 			log.Fatal(err)
 		}
 
-		handler.generalConfig.SetLastFMSessionKey(handler.api.GetSessionKey())
+		handler.config.SetLastFMSessionKey(handler.api.GetSessionKey())
 	}
 
 	return handler.api
