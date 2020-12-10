@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-
 	"github.com/michplunkett/spotifyfm/api"
 	"github.com/michplunkett/spotifyfm/api/authentication"
 	"github.com/michplunkett/spotifyfm/api/endpoints"
@@ -28,7 +27,9 @@ func main() {
 	fmt.Println("You are logged in as ", spotifyUser.DisplayName)
 
 	spotifyCurrentlyPlaying := spotifyHandler.GetCurrentlyPlaying()
-	fmt.Println("This is the track you're currently playing ", spotifyCurrentlyPlaying.Item.Name)
+	if spotifyCurrentlyPlaying.Item != nil {
+		fmt.Println("This is the track you're currently playing ", spotifyCurrentlyPlaying.Item.Name)
+	}
 
 	spotifyTopTracks := spotifyHandler.GetTopTracks(config.SpotifyPeriodShort, 50)
 	fmt.Println("This is your top track ", spotifyTopTracks.Tracks[0].SimpleTrack.Name)
