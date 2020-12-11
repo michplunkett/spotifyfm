@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/michplunkett/spotifyfm/api"
 	"github.com/michplunkett/spotifyfm/api/authentication"
 	"github.com/michplunkett/spotifyfm/api/endpoints"
