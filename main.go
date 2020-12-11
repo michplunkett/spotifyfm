@@ -6,9 +6,13 @@ import (
 	"github.com/michplunkett/spotifyfm/api/authentication"
 	"github.com/michplunkett/spotifyfm/api/endpoints"
 	"github.com/michplunkett/spotifyfm/config"
+	"github.com/michplunkett/spotifyfm/projects/lastfm"
 )
 
 func main() {
+	fmt.Println("---------------------")
+	fmt.Println("Doin' some music things")
+
 	// Starting the http server
 	api.Start()
 
@@ -47,12 +51,8 @@ func main() {
 	lastFMUser := lastFMHandler.GetUserInfo()
 	fmt.Println("You are logged in as ", lastFMUser.RealName)
 
-	lastFMCurrentlyPlaying := lastFMHandler.GetCurrentTrack(lastFMUser.Name, 1)
-	fmt.Println("This is the track you're currently playing ", lastFMCurrentlyPlaying.Tracks[0].Name)
-
-	lastFMTopTracks := lastFMHandler.GetTopTracks(lastFMUser.Name, 50, config.LastFMPeriod1Month)
-	fmt.Println("This is your top track ", lastFMTopTracks.Tracks[0].Name)
-
-	lastFMTopArtists := lastFMHandler.GetTopArtists(lastFMUser.Name, 50, config.LastFMPeriod1Month)
-	fmt.Println("This is your top artist ", lastFMTopArtists.Artists[0].Name)
+	lastFMArtistsTrackVsTime := lastfm.NewArtistsTrackVsTime(lastFMHandler, config.LastFMPeriod1Month, lastFMUser.Name)
+	lastFMArtistsTrackVsTime.GetInformation()
+	lastFMArtistsTrackVsTime.DoCalculations()
+	lastFMArtistsTrackVsTime.PrintoutResults()
 }
