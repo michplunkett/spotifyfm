@@ -9,8 +9,6 @@ import (
 	"github.com/michplunkett/spotifyfm/util/constants"
 )
 
-const limit = 300
-
 type ArtistsTrackVsTime interface {
 	GetInformation()
 	DoCalculations()
@@ -38,8 +36,8 @@ func NewArtistsTrackVsTime(handler endpoints.LastFMHandler, timeSpan, userName s
 }
 
 func (a *artistsTrackVsTime) GetInformation() {
-	a.tracks = a.handler.GetAllTopTracks(limit, a.timeSpan, a.userName)
-	a.lastFMSortedArtists = a.handler.GetAllTopArtists(limit, a.timeSpan, a.userName)
+	a.tracks = a.handler.GetAllTopTracks(constants.APIObjectLimit, a.timeSpan, a.userName)
+	a.lastFMSortedArtists = a.handler.GetAllTopArtists(constants.APIObjectLimit, a.timeSpan, a.userName)
 
 	artistNameToUUIDHash := make(map[string]string, 0)
 	for _, artist := range a.lastFMSortedArtists {
