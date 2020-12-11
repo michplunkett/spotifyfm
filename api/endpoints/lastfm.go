@@ -25,22 +25,6 @@ func NewLastFMHandler(api *lastfm.Api) LastFMHandler {
 	}
 }
 
-func (handler *lastFMHandler) GetAllTopTracks(limit int, period string, userName string) []models.Track {
-	tracks := make([]models.Track, 0)
-
-	page := 1
-	for {
-		topTracks := handler.GetTopTracks(limit, page, period, userName)
-		domainTracks := models.UserGetTopTracksToDomainTracks(topTracks)
-		tracks = append(tracks, domainTracks...)
-		if len(domainTracks) < limit {
-			break
-		}
-		page = page + 1
-	}
-	return tracks
-}
-
 func (handler *lastFMHandler) GetAllTopArtists(limit int, period string, userName string) []models.Artist {
 	artists := make([]models.Artist, 0)
 
@@ -55,6 +39,22 @@ func (handler *lastFMHandler) GetAllTopArtists(limit int, period string, userNam
 		page = page + 1
 	}
 	return artists
+}
+
+func (handler *lastFMHandler) GetAllTopTracks(limit int, period string, userName string) []models.Track {
+	tracks := make([]models.Track, 0)
+
+	page := 1
+	for {
+		topTracks := handler.GetTopTracks(limit, page, period, userName)
+		domainTracks := models.UserGetTopTracksToDomainTracks(topTracks)
+		tracks = append(tracks, domainTracks...)
+		if len(domainTracks) < limit {
+			break
+		}
+		page = page + 1
+	}
+	return tracks
 }
 
 func (handler *lastFMHandler) GetCurrentTrack(userName string, limit int) *lastfm.UserGetRecentTracks {
