@@ -1,4 +1,4 @@
-package config
+package environment
 
 import (
 	"fmt"
@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/michplunkett/spotifyfm/models"
+	"github.com/michplunkett/spotifyfm/util/constants"
 )
 
 // EnvironmentVariableController will handle creating and handling all fo the configs
@@ -40,7 +41,7 @@ func NewEnvVars() EnvVars {
 
 	e.fileConfigs = models.GetConfigValues()
 
-	lastFmEnvVars := []string{os.Getenv(LastFMApiKey), os.Getenv(LastFMSharedSecret)}
+	lastFmEnvVars := []string{os.Getenv(constants.LastFMApiKey), os.Getenv(constants.LastFMSharedSecret)}
 	if arrayHasNoEmptyStrings(lastFmEnvVars) {
 		e.lastfmApiKey = lastFmEnvVars[0]
 		e.lastfmSharedSecret = lastFmEnvVars[1]
@@ -48,7 +49,7 @@ func NewEnvVars() EnvVars {
 		fmt.Errorf("one of the last.fm environment variables is not present in your system")
 	}
 
-	spotifyEnvVars := []string{os.Getenv(SpotifyClientID), os.Getenv(SpotifyClientSecret), os.Getenv(SpotifyUserName)}
+	spotifyEnvVars := []string{os.Getenv(constants.SpotifyClientID), os.Getenv(constants.SpotifyClientSecret), os.Getenv(constants.SpotifyUserName)}
 	if arrayHasNoEmptyStrings(spotifyEnvVars) {
 		e.spotifyClientID = spotifyEnvVars[0]
 		e.spotifyClientSecret = spotifyEnvVars[1]
@@ -125,7 +126,7 @@ func (e *envVars) SetSpotifyRefreshToken(refreshToken string) {
 
 func arrayHasNoEmptyStrings(envVars []string) bool {
 	for _, value := range envVars {
-		if value == EmptyString {
+		if value == constants.EmptyString {
 			return false
 		}
 	}

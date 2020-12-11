@@ -6,15 +6,20 @@ import (
 	"github.com/michplunkett/spotifyfm/api"
 	"github.com/michplunkett/spotifyfm/api/authentication"
 	"github.com/michplunkett/spotifyfm/api/endpoints"
-	"github.com/michplunkett/spotifyfm/config"
+	"github.com/michplunkett/spotifyfm/projects/lastfm"
+	"github.com/michplunkett/spotifyfm/util/constants"
+	"github.com/michplunkett/spotifyfm/util/environment"
 )
 
 func main() {
+	fmt.Println("---------------------")
+	fmt.Println("Doin' some music things")
+
 	// Starting the http server
 	api.Start()
 
 	// Getting the environment variables
-	envVars := config.NewEnvVars()
+	envVars := environment.NewEnvVars()
 
 	spotifyAuth := authentication.NewSpotifyAuthHandlerAll(envVars)
 	spotifyClient := spotifyAuth.Authenticate()
@@ -28,12 +33,15 @@ func main() {
 	fmt.Println("You are logged in as ", spotifyUser.DisplayName)
 
 	spotifyCurrentlyPlaying := spotifyHandler.GetCurrentlyPlaying()
-	fmt.Println("This is the track you're currently playing ", spotifyCurrentlyPlaying.Item.Name)
+	// Check is here in case you are not actively listening to something.
+	if spotifyCurrentlyPlaying.Item != nil {
+		fmt.Println("This is the track you're currently playing ", spotifyCurrentlyPlaying.Item.Name)
+	}
 
-	spotifyTopTracks := spotifyHandler.GetTopTracks(config.SpotifyPeriodShort, 50)
+	spotifyTopTracks := spotifyHandler.GetTopTracks(constants.SpotifyPeriodShort, 50)
 	fmt.Println("This is your top track ", spotifyTopTracks.Tracks[0].SimpleTrack.Name)
 
-	spotifyTopArtists := spotifyHandler.GetTopArtists(config.SpotifyPeriodShort, 50)
+	spotifyTopArtists := spotifyHandler.GetTopArtists(constants.SpotifyPeriodShort, 50)
 	fmt.Println("This is your top artist ", spotifyTopArtists.Artists[0].Name)
 
 	lastFMAuth := authentication.NewLastFMAuthHandler(envVars)
@@ -46,12 +54,8 @@ func main() {
 	lastFMUser := lastFMHandler.GetUserInfo()
 	fmt.Println("You are logged in as ", lastFMUser.RealName)
 
-	lastFMCurrentlyPlaying := lastFMHandler.GetCurrentTrack(lastFMUser.Name, 1)
-	fmt.Println("This is the track you're currently playing ", lastFMCurrentlyPlaying.Tracks[0].Name)
-
-	lastFMTopTracks := lastFMHandler.GetTopTracks(lastFMUser.Name, 50, config.LastFMPeriod1Month)
-	fmt.Println("This is your top track ", lastFMTopTracks.Tracks[0].Name)
-
-	lastFMTopArtists := lastFMHandler.GetTopArtists(lastFMUser.Name, 50, config.LastFMPeriod1Month)
-	fmt.Println("This is your top artist ", lastFMTopArtists.Artists[0].Name)
+	lastFMArtistsTrackVsTime := lastfm.NewArtistsTrackVsTime(lastFMHandler, constants.LastFMPeriod1Month, lastFMUser.Name)
+	lastFMArtistsTrackVsTime.GetInformation()
+	lastFMArtistsTrackVsTime.DoCalculations()
+	lastFMArtistsTrackVsTime.PrintoutResults()
 }

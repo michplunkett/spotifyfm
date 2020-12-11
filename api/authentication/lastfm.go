@@ -8,7 +8,8 @@ import (
 	"github.com/pkg/browser"
 	"github.com/shkh/lastfm-go/lastfm"
 
-	"github.com/michplunkett/spotifyfm/config"
+	"github.com/michplunkett/spotifyfm/util/constants"
+	"github.com/michplunkett/spotifyfm/util/environment"
 )
 
 type LastFMAuthHandler interface {
@@ -20,10 +21,10 @@ var channelErr = make(chan error)
 
 type lastFMAuthHandler struct {
 	api    *lastfm.Api
-	config config.EnvVars
+	config environment.EnvVars
 }
 
-func NewLastFMAuthHandler(e config.EnvVars) LastFMAuthHandler {
+func NewLastFMAuthHandler(e environment.EnvVars) LastFMAuthHandler {
 	return &lastFMAuthHandler{
 		api:    lastfm.New(e.GetLastFMApiKey(), e.GetLastFMSharedSecret()),
 		config: e,
@@ -32,11 +33,11 @@ func NewLastFMAuthHandler(e config.EnvVars) LastFMAuthHandler {
 
 func (handler *lastFMAuthHandler) Authenticate() *lastfm.Api {
 	// it's a non-empty string check because last.fm auth lasts FOREVER
-	if handler.config.GetLastFMSessionKey() != config.EmptyString {
+	if handler.config.GetLastFMSessionKey() != constants.EmptyString {
 		handler.api.SetSession(handler.config.GetLastFMSessionKey())
 	} else {
 		http.HandleFunc("/lastfm-callback", handler.finishAuthentication)
-		authRequestUrl := handler.api.GetAuthRequestUrl(config.LastFMRedirectURL)
+		authRequestUrl := handler.api.GetAuthRequestUrl(constants.LastFMRedirectURL)
 
 		//fmt.Println("Opening the LastFM authorization URL in your browser:", authRequestUrl)
 		browser.OpenURL(authRequestUrl)

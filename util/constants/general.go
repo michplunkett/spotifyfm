@@ -1,8 +1,9 @@
-package config
+package constants
 
 const (
 	// General
-	EmptyString string = ""
+	EmptyString    = ""
+	APIObjectLimit = 300
 
 	// Last.fm credential names
 	LastFMApiKey       = "LAST_FM_API_KEY"
