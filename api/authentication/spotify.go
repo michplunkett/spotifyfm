@@ -4,15 +4,16 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"fmt"
-	"golang.org/x/oauth2"
 	"log"
 	"net/http"
 	"time"
 
 	"github.com/pkg/browser"
 	"github.com/zmb3/spotify"
+	"golang.org/x/oauth2"
 
-	"github.com/michplunkett/spotifyfm/config"
+	"github.com/michplunkett/spotifyfm/util/constants"
+	"github.com/michplunkett/spotifyfm/util/environment"
 )
 
 type SpotifyAuthHandler interface {
@@ -22,21 +23,21 @@ type SpotifyAuthHandler interface {
 type spotifyAuthHandler struct {
 	auth   spotify.Authenticator
 	ch     chan *spotify.Client
-	config config.EnvVars
+	config environment.EnvVars
 	state  string
 }
 
-func newSpotifyAuthHandlerGeneric(permissions []string, e config.EnvVars) SpotifyAuthHandler {
+func newSpotifyAuthHandlerGeneric(permissions []string, e environment.EnvVars) SpotifyAuthHandler {
 	state, _ := generateRandomString(23)
 	return &spotifyAuthHandler{
-		auth:   spotify.NewAuthenticator(config.SpotifyRedirectURL, permissions...),
+		auth:   spotify.NewAuthenticator(constants.SpotifyRedirectURL, permissions...),
 		ch:     make(chan *spotify.Client),
 		config: e,
 		state:  state,
 	}
 }
 
-func NewSpotifyAuthHandlerAll(e config.EnvVars) SpotifyAuthHandler {
+func NewSpotifyAuthHandlerAll(e environment.EnvVars) SpotifyAuthHandler {
 	var permissions = make([]string, 0)
 	permissions = append(permissions, spotify.ScopeUserFollowRead,
 		spotify.ScopeUserReadPrivate, spotify.ScopeUserReadEmail,
@@ -46,21 +47,21 @@ func NewSpotifyAuthHandlerAll(e config.EnvVars) SpotifyAuthHandler {
 	return newSpotifyAuthHandlerGeneric(permissions, e)
 }
 
-func NewSpotifyAuthHandlerProfile(e config.EnvVars) SpotifyAuthHandler {
+func NewSpotifyAuthHandlerProfile(e environment.EnvVars) SpotifyAuthHandler {
 	var permissions = make([]string, 0)
 	permissions = append(permissions, spotify.ScopeUserFollowRead,
 		spotify.ScopeUserReadPrivate, spotify.ScopeUserReadEmail)
 	return newSpotifyAuthHandlerGeneric(permissions, e)
 }
 
-func NewSpotifyAuthHandlerMusicStorage(e config.EnvVars) SpotifyAuthHandler {
+func NewSpotifyAuthHandlerMusicStorage(e environment.EnvVars) SpotifyAuthHandler {
 	var permissions = make([]string, 0)
 	permissions = append(permissions, spotify.ScopePlaylistReadPrivate,
 		spotify.ScopePlaylistReadCollaborative, spotify.ScopeUserLibraryRead)
 	return newSpotifyAuthHandlerGeneric(permissions, e)
 }
 
-func NewSpotifyAuthHandlerActivity(e config.EnvVars) SpotifyAuthHandler {
+func NewSpotifyAuthHandlerActivity(e environment.EnvVars) SpotifyAuthHandler {
 	var permissions = make([]string, 0)
 	permissions = append(permissions, spotify.ScopeUserTopRead, spotify.ScopeUserReadRecentlyPlayed,
 		spotify.ScopeUserReadCurrentlyPlaying)

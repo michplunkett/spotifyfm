@@ -5,8 +5,9 @@ import (
 	"github.com/michplunkett/spotifyfm/api"
 	"github.com/michplunkett/spotifyfm/api/authentication"
 	"github.com/michplunkett/spotifyfm/api/endpoints"
-	"github.com/michplunkett/spotifyfm/config"
 	"github.com/michplunkett/spotifyfm/projects/lastfm"
+	"github.com/michplunkett/spotifyfm/util/constants"
+	"github.com/michplunkett/spotifyfm/util/environment"
 )
 
 func main() {
@@ -17,7 +18,7 @@ func main() {
 	api.Start()
 
 	// Getting the environment variables
-	envVars := config.NewEnvVars()
+	envVars := environment.NewEnvVars()
 
 	spotifyAuth := authentication.NewSpotifyAuthHandlerAll(envVars)
 	spotifyClient := spotifyAuth.Authenticate()
@@ -35,10 +36,10 @@ func main() {
 		fmt.Println("This is the track you're currently playing ", spotifyCurrentlyPlaying.Item.Name)
 	}
 
-	spotifyTopTracks := spotifyHandler.GetTopTracks(config.SpotifyPeriodShort, 50)
+	spotifyTopTracks := spotifyHandler.GetTopTracks(constants.SpotifyPeriodShort, 50)
 	fmt.Println("This is your top track ", spotifyTopTracks.Tracks[0].SimpleTrack.Name)
 
-	spotifyTopArtists := spotifyHandler.GetTopArtists(config.SpotifyPeriodShort, 50)
+	spotifyTopArtists := spotifyHandler.GetTopArtists(constants.SpotifyPeriodShort, 50)
 	fmt.Println("This is your top artist ", spotifyTopArtists.Artists[0].Name)
 
 	lastFMAuth := authentication.NewLastFMAuthHandler(envVars)
@@ -51,7 +52,7 @@ func main() {
 	lastFMUser := lastFMHandler.GetUserInfo()
 	fmt.Println("You are logged in as ", lastFMUser.RealName)
 
-	lastFMArtistsTrackVsTime := lastfm.NewArtistsTrackVsTime(lastFMHandler, config.LastFMPeriod1Month, lastFMUser.Name)
+	lastFMArtistsTrackVsTime := lastfm.NewArtistsTrackVsTime(lastFMHandler, constants.LastFMPeriod1Month, lastFMUser.Name)
 	lastFMArtistsTrackVsTime.GetInformation()
 	lastFMArtistsTrackVsTime.DoCalculations()
 	lastFMArtistsTrackVsTime.PrintoutResults()

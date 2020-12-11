@@ -5,8 +5,8 @@ import (
 	"sort"
 
 	"github.com/michplunkett/spotifyfm/api/endpoints"
-	"github.com/michplunkett/spotifyfm/config"
 	"github.com/michplunkett/spotifyfm/models"
+	"github.com/michplunkett/spotifyfm/util/constants"
 )
 
 const limit = 300
@@ -43,18 +43,18 @@ func (a *artistsTrackVsTime) GetInformation() {
 
 	artistNameToUUIDHash := make(map[string]string, 0)
 	for _, artist := range a.lastFMSortedArtists {
-		if _, ok := artistNameToUUIDHash[artist.LowerCaseName]; !ok && artist.UUID != config.EmptyString {
+		if _, ok := artistNameToUUIDHash[artist.LowerCaseName]; !ok && artist.UUID != constants.EmptyString {
 			artistNameToUUIDHash[artist.LowerCaseName] = artist.UUID
 		}
 	}
 	for _, track := range a.tracks {
-		if _, ok := artistNameToUUIDHash[track.LowerCaseArtist]; !ok && track.ArtistUUID != config.EmptyString {
+		if _, ok := artistNameToUUIDHash[track.LowerCaseArtist]; !ok && track.ArtistUUID != constants.EmptyString {
 			artistNameToUUIDHash[track.LowerCaseArtist] = track.ArtistUUID
 		}
 	}
 
 	for idx, track := range a.tracks {
-		if track.ArtistUUID == config.EmptyString {
+		if track.ArtistUUID == constants.EmptyString {
 			if mbID, ok := artistNameToUUIDHash[track.LowerCaseArtist]; ok {
 				track.ArtistUUID = mbID
 				a.tracks[idx] = track
