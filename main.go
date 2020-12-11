@@ -33,6 +33,7 @@ func main() {
 	fmt.Println("You are logged in as ", spotifyUser.DisplayName)
 
 	spotifyCurrentlyPlaying := spotifyHandler.GetCurrentlyPlaying()
+	// Check is here in case you are not actively listening to something.
 	if spotifyCurrentlyPlaying.Item != nil {
 		fmt.Println("This is the track you're currently playing ", spotifyCurrentlyPlaying.Item.Name)
 	}
