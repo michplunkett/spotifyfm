@@ -33,6 +33,7 @@ func (handler *lastFMHandler) GetAllTopArtists(limit int, period string, userNam
 		topArtists := handler.GetTopArtists(limit, page, period, userName)
 		domainArtists := models.UserGetTopArtistsToDomainArtists(topArtists)
 		artists = append(artists, domainArtists...)
+		// When the amount of artists being returned is less than the limit there are no more artists to pull
 		if len(domainArtists) < limit {
 			break
 		}
@@ -49,6 +50,7 @@ func (handler *lastFMHandler) GetAllTopTracks(limit int, period string, userName
 		topTracks := handler.GetTopTracks(limit, page, period, userName)
 		domainTracks := models.UserGetTopTracksToDomainTracks(topTracks)
 		tracks = append(tracks, domainTracks...)
+		// When the amount of tracks being returned is less than the limit there are no more tracks to pull
 		if len(domainTracks) < limit {
 			break
 		}
