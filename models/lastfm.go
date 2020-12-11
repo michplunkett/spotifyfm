@@ -29,7 +29,7 @@ func UserGetTopArtistsToDomainArtists(artistList *lastfm.UserGetTopArtists) []Ar
 			Rank:          rank,
 			UUID:          lastFMArtist.Mbid,
 		}
-		// not all artists have mbID
+		// Not all artists have a UUID.
 		if artist.UUID == "" {
 			artist.UUID = uuid.New().String()
 		}
@@ -54,10 +54,12 @@ func UserGetTopTracksToDomainTracks(trackList *lastfm.UserGetTopTracks) []Track 
 		duration, _ := strconv.Atoi(lastFMTrack.Duration)
 		playCount, _ := strconv.Atoi(lastFMTrack.PlayCount)
 		rank, _ := strconv.Atoi(lastFMTrack.Rank)
+		// Not all songs come with assigned durations.
 		if duration == 0 {
 			// Last.fm says the average length of a song is 3.5 minutes, 210 seconds.
 			duration = 210
 		}
+		// If the song is included, I presume it is on the list because it has been played AT LEAST once.
 		if playCount == 0 {
 			// If the song is in the list, I presume it's been played at least once.
 			playCount = 1
