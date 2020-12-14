@@ -1,7 +1,6 @@
 package models
 
 import (
-	"log"
 	"regexp"
 	"strconv"
 	"strings"
@@ -82,10 +81,8 @@ func UserGetTopTracksToDomainTracks(trackList *lastfm.UserGetTopTracks) []Track 
 	return tracks
 }
 
+var regEx, _ = regexp.Compile("[^a-zA-Z0-9]+")
+
 func removeNonWordCharacters(name string) string {
-	reg, err := regexp.Compile("[^a-zA-Z0-9]+")
-	if err != nil {
-		log.Fatal(err)
-	}
-	return reg.ReplaceAllString(name, constants.EmptyString)
+	return regEx.ReplaceAllString(name, constants.EmptyString)
 }
