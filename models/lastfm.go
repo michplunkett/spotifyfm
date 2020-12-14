@@ -1,11 +1,15 @@
 package models
 
 import (
+	"log"
+	"regexp"
 	"strconv"
 	"strings"
 
 	"github.com/google/uuid"
 	"github.com/shkh/lastfm-go/lastfm"
+
+	"github.com/michplunkett/spotifyfm/util/constants"
 )
 
 type Artist struct {
@@ -24,7 +28,7 @@ func UserGetTopArtistsToDomainArtists(artistList *lastfm.UserGetTopArtists) []Ar
 		rank, _ := strconv.Atoi(lastFMArtist.Rank)
 		artist := Artist{
 			Name:          lastFMArtist.Name,
-			LowerCaseName: strings.ToLower(lastFMArtist.Name),
+			LowerCaseName: removeNonWordCharacters(strings.ToLower(lastFMArtist.Name)),
 			PlayCount:     playCount,
 			Rank:          rank,
 			UUID:          lastFMArtist.Mbid,
@@ -68,7 +72,7 @@ func UserGetTopTracksToDomainTracks(trackList *lastfm.UserGetTopTracks) []Track 
 			Artist:          lastFMTrack.Artist.Name,
 			ArtistUUID:      lastFMTrack.Artist.Mbid,
 			Duration:        duration,
-			LowerCaseArtist: strings.ToLower(lastFMTrack.Artist.Name),
+			LowerCaseArtist: removeNonWordCharacters(strings.ToLower(lastFMTrack.Artist.Name)),
 			Name:            lastFMTrack.Name,
 			PlayCount:       playCount,
 			Rank:            rank,
@@ -76,4 +80,12 @@ func UserGetTopTracksToDomainTracks(trackList *lastfm.UserGetTopTracks) []Track 
 		tracks = append(tracks, track)
 	}
 	return tracks
+}
+
+func removeNonWordCharacters(name string) string {
+	reg, err := regexp.Compile("[^a-zA-Z0-9]+")
+	if err != nil {
+		log.Fatal(err)
+	}
+	return reg.ReplaceAllString(name, constants.EmptyString)
 }
