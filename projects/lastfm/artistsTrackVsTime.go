@@ -9,6 +9,11 @@ import (
 	"github.com/michplunkett/spotifyfm/util/constants"
 )
 
+// There are some artists that have aliases in last.fm
+var problematicArtistMapping = map[string]string{
+	"strfkr": "starfucker",
+}
+
 type ArtistsTrackVsTime interface {
 	GetInformation()
 	DoCalculations()
@@ -50,12 +55,19 @@ func (a *artistsTrackVsTime) GetInformation() {
 	// Add artist UUIDs to Track structs that are missing their respective artist's UUID.
 	for idx, track := range a.tracks {
 		if track.ArtistUUID == constants.EmptyString {
-			if mbID, ok := artistNameToUUIDHash[track.LowerCaseArtist]; ok {
-				track.ArtistUUID = mbID
+			if uuid, ok := artistNameToUUIDHash[track.LowerCaseArtist]; ok {
+				track.ArtistUUID = uuid
 				a.tracks[idx] = track
 			} else {
-				// Print any track that does not have a present artist.
-				fmt.Println(track)
+				if hashName, ok := problematicArtistMapping[track.LowerCaseArtist]; ok {
+					if uuid, ok := artistNameToUUIDHash[hashName]; ok {
+						track.ArtistUUID = uuid
+						a.tracks[idx] = track
+					}
+				} else {
+					// Print any track that does not have a present artist.
+					fmt.Println(track)
+				}
 			}
 		}
 	}
