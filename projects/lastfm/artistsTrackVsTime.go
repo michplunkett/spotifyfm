@@ -15,9 +15,7 @@ var problematicArtistMapping = map[string]string{
 }
 
 type ArtistsTrackVsTime interface {
-	GetInformation()
-	DoCalculations()
-	PrintoutResults()
+	Execute()
 }
 
 type artistsTrackVsTime struct {
@@ -40,7 +38,13 @@ func NewArtistsTrackVsTime(handler endpoints.LastFMHandler, timeSpan, userName s
 	}
 }
 
-func (a *artistsTrackVsTime) GetInformation() {
+func (a *artistsTrackVsTime) Execute() {
+	a.getInformation()
+	a.doCalculations()
+	a.printoutResults()
+}
+
+func (a *artistsTrackVsTime) getInformation() {
 	a.tracks = a.handler.GetAllTopTracks(constants.APIObjectLimit, a.timeSpan, a.userName)
 	a.lastFMSortedArtists = a.handler.GetAllTopArtists(constants.APIObjectLimit, a.timeSpan, a.userName)
 
@@ -73,7 +77,7 @@ func (a *artistsTrackVsTime) GetInformation() {
 	}
 }
 
-func (a *artistsTrackVsTime) DoCalculations() {
+func (a *artistsTrackVsTime) doCalculations() {
 	// Create a hash mapping an artist's UUID to its track duration sum.
 	artistsDurationHash := make(map[string]int, 0)
 	for _, artist := range a.lastFMSortedArtists {
@@ -109,7 +113,7 @@ func (a *artistsTrackVsTime) DoCalculations() {
 
 }
 
-func (a *artistsTrackVsTime) PrintoutResults() {
+func (a *artistsTrackVsTime) printoutResults() {
 	// I'd like a better way for visualising this, but this will have to do for right now.
 	fmt.Println("---TOP 20 ARTISTS BY TRACKS LISTENED VS TIME LISTENED---")
 	fmt.Printf("Rank\tArtist(Tracks)\tTrack Listens\tArtist(Time)\tMinutes Listened\n")

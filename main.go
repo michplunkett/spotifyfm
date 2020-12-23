@@ -54,8 +54,5 @@ func main() {
 	lastFMUser := lastFMHandler.GetUserInfo()
 	fmt.Println("You are logged in as ", lastFMUser.RealName)
 
-	lastFMArtistsTrackVsTime := lastfm.NewArtistsTrackVsTime(lastFMHandler, constants.LastFMPeriod1Month, lastFMUser.Name)
-	lastFMArtistsTrackVsTime.GetInformation()
-	lastFMArtistsTrackVsTime.DoCalculations()
-	lastFMArtistsTrackVsTime.PrintoutResults()
+	lastfm.NewArtistsTrackVsTime(lastFMHandler, constants.LastFMPeriod1Month, lastFMUser.Name).Execute()
 }
