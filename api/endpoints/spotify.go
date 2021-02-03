@@ -1,12 +1,18 @@
 package endpoints
 
-import "github.com/zmb3/spotify"
+import (
+	"github.com/zmb3/spotify"
+)
+
+const (
+	pageSizeConst int = 20
+)
 
 type SpotifyCaller interface {
 	GetUserInfo() *spotify.PrivateUser
 	GetCurrentlyPlaying() *spotify.CurrentlyPlaying
-	GetTopTracks(timeRange string, pageSize int) *spotify.FullTrackPage
-	GetTopArtists(timeRange string, pageSize int) *spotify.FullArtistPage
+	GetAllTopTracks(timeRange string) []spotify.FullTrack
+	GetAllTopArtists(timeRange string) []spotify.FullArtist
 }
 
 type spotifyHandler struct {
@@ -29,18 +35,40 @@ func (handler *spotifyHandler) GetCurrentlyPlaying() *spotify.CurrentlyPlaying {
 	return currentlyPlaying
 }
 
-func (handler *spotifyHandler) GetTopTracks(timeRange string, pageSize int) *spotify.FullTrackPage {
+func (handler *spotifyHandler) getTopTracks(timeRange string, offset, pageSize int) []spotify.FullTrack {
 	topTracks, _ := handler.client.CurrentUsersTopTracksOpt(&spotify.Options{
 		Limit:     &pageSize,
+		Offset:    &offset,
 		Timerange: &timeRange,
 	})
-	return topTracks
+	return topTracks.Tracks
 }
 
-func (handler *spotifyHandler) GetTopArtists(timeRange string, pageSize int) *spotify.FullArtistPage {
+func (handler *spotifyHandler) GetAllTopTracks(timeRange string) []spotify.FullTrack {
+	tracks := make([]spotify.FullTrack, 0)
+
+	offset := 0
+	for {
+		topTracks := handler.getTopTracks(timeRange, offset, pageSizeConst)
+		tracks = append(tracks, topTracks...)
+		// When the amount of tracks being returned is less than the limit there are no more tracks to pull
+		if len(topTracks) < pageSizeConst {
+			break
+		}
+		offset = offset + pageSizeConst
+	}
+	return tracks
+}
+
+func (handler *spotifyHandler) getTopArtists(timeRange string, pageSize int) []spotify.FullArtist {
 	topArtists, _ := handler.client.CurrentUsersTopArtistsOpt(&spotify.Options{
 		Limit:     &pageSize,
 		Timerange: &timeRange,
 	})
-	return topArtists
+	return topArtists.Artists
+}
+
+func (handler *spotifyHandler) GetAllTopArtists(timeRange string) []spotify.FullArtist {
+	// There currently isn't an offset option for CurrentUsersTopArtistsOpt so I'm doing one large grab
+	return handler.getTopArtists(timeRange, pageSizeConst)
 }
