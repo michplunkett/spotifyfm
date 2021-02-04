@@ -13,7 +13,7 @@ type SpotifyHandler interface {
 	GetCurrentlyPlaying() *spotify.CurrentlyPlaying
 	GetAllTopTracks(timeRange string) []spotify.FullTrack
 	GetAllTopArtists(timeRange string) []spotify.FullArtist
-	GetAudioFeaturesOfTrack(trackID spotify.ID) spotify.AnalysisTrack
+	GetAudioFeaturesOfTrack(trackID spotify.ID) *spotify.AudioFeatures
 	SearchForSong(songName, songArtist string) *spotify.FullTrack
 }
 
