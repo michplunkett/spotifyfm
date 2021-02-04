@@ -12,6 +12,7 @@ import (
 // There are some artists that have aliases in last.fm
 var problematicArtistMapping = map[string]string{
 	"strfkr": "starfucker",
+	"th1rt3en": "thirteen",
 }
 
 type ArtistsTrackVsTime interface {
@@ -90,9 +91,6 @@ func (a *artistsTrackVsTime) doCalculations() {
 			// The total time listened to one song is its duration * number of times played.
 			artist += track.Duration * track.PlayCount
 			artistsDurationHash[track.ArtistUUID] = artist
-		} else {
-			// Print track if it does not have a present artist.
-			fmt.Println(track)
 		}
 	}
 
