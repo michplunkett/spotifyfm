@@ -8,11 +8,13 @@ const (
 	pageSizeConst int = 20
 )
 
-type SpotifyCaller interface {
+type SpotifyHandler interface {
 	GetUserInfo() *spotify.PrivateUser
 	GetCurrentlyPlaying() *spotify.CurrentlyPlaying
 	GetAllTopTracks(timeRange string) []spotify.FullTrack
 	GetAllTopArtists(timeRange string) []spotify.FullArtist
+	GetAudioFeaturesOfTrack(trackID spotify.ID) spotify.AnalysisTrack
+	SearchForSong(songName, songArtist string) *spotify.FullTrack
 }
 
 type spotifyHandler struct {
@@ -71,4 +73,27 @@ func (handler *spotifyHandler) getTopArtists(timeRange string, pageSize int) []s
 func (handler *spotifyHandler) GetAllTopArtists(timeRange string) []spotify.FullArtist {
 	// There currently isn't an offset option for CurrentUsersTopArtistsOpt so I'm doing one large grab
 	return handler.getTopArtists(timeRange, pageSizeConst)
+}
+
+func (handler *spotifyHandler) GetAudioFeaturesOfTrack(trackID spotify.ID) *spotify.AudioFeatures {
+	audioFeatures, _ := handler.client.GetAudioFeatures(trackID)
+	var features *spotify.AudioFeatures
+	if len(audioFeatures) > 0 {
+		features = audioFeatures[0]
+	}
+	return features
+}
+
+func (handler *spotifyHandler) SearchForSong(songName, songArtist string) *spotify.FullTrack {
+	queryString := songName + " " + songArtist
+	limit := 1
+	options := spotify.Options{
+		Limit: &limit,
+	}
+	result, _ := handler.client.SearchOpt(queryString, spotify.SearchTypeTrack, &options)
+	var track *spotify.FullTrack
+	if len(result.Tracks.Tracks) > 0 {
+		track = &result.Tracks.Tracks[0]
+	}
+	return track
 }
