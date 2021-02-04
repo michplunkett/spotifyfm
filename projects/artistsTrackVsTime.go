@@ -1,4 +1,4 @@
-package lastfm
+package projects
 
 import (
 	"fmt"

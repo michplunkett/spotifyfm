@@ -6,7 +6,7 @@ import (
 	"github.com/michplunkett/spotifyfm/api"
 	"github.com/michplunkett/spotifyfm/api/authentication"
 	"github.com/michplunkett/spotifyfm/api/endpoints"
-	"github.com/michplunkett/spotifyfm/projects/lastfm"
+	"github.com/michplunkett/spotifyfm/projects"
 	"github.com/michplunkett/spotifyfm/util/constants"
 	"github.com/michplunkett/spotifyfm/util/environment"
 )
@@ -56,5 +56,5 @@ func main() {
 	lastFMUser := lastFMHandler.GetUserInfo()
 	fmt.Println("You are logged in as ", lastFMUser.RealName)
 
-	lastfm.NewArtistsTrackVsTime(lastFMHandler, constants.LastFMPeriod3Month, lastFMUser.Name).Execute()
+	projects.NewArtistsTrackVsTime(lastFMHandler, constants.LastFMPeriod3Month, lastFMUser.Name).Execute()
 }
