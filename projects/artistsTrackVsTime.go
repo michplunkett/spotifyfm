@@ -9,12 +9,6 @@ import (
 	"github.com/michplunkett/spotifyfm/util/constants"
 )
 
-// There are some artists that have aliases in last.fm
-var problematicArtistMapping = map[string]string{
-	"strfkr": "starfucker",
-	"th1rt3en": "thirteen",
-}
-
 type ArtistsTrackVsTime interface {
 	Execute()
 }
@@ -64,7 +58,7 @@ func (a *artistsTrackVsTime) getInformation() {
 				track.ArtistUUID = uuid
 				a.tracks[idx] = track
 			} else {
-				if hashName, ok := problematicArtistMapping[track.LowerCaseArtist]; ok {
+				if hashName, ok := constants.ProblematicArtistMapping[track.LowerCaseArtist]; ok {
 					if uuid, ok := artistNameToUUIDHash[hashName]; ok {
 						track.ArtistUUID = uuid
 						a.tracks[idx] = track

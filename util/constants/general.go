@@ -26,3 +26,9 @@ const (
 	SpotifyPeriodMedium = "medium"
 	SpotifyPeriodShort  = "short"
 )
+
+// There are some artists that have aliases in last.fm
+var ProblematicArtistMapping = map[string]string{
+	"strfkr": "starfucker",
+	"th1rt3en": "thirteen",
+}
