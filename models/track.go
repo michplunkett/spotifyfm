@@ -6,41 +6,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/shkh/lastfm-go/lastfm"
 
 	"github.com/michplunkett/spotifyfm/util/constants"
 )
-
-type Artist struct {
-	DurationSum   int
-	LowerCaseName string
-	Name          string
-	PlayCount     int
-	Rank          int
-	UUID          string
-}
-
-func UserGetTopArtistsToDomainArtists(artistList *lastfm.UserGetTopArtists) []Artist {
-	artists := make([]Artist, 0)
-	for _, lastFMArtist := range artistList.Artists {
-		playCount, _ := strconv.Atoi(lastFMArtist.PlayCount)
-		rank, _ := strconv.Atoi(lastFMArtist.Rank)
-		artist := Artist{
-			Name:          lastFMArtist.Name,
-			LowerCaseName: removeNonWordCharacters(strings.ToLower(lastFMArtist.Name)),
-			PlayCount:     playCount,
-			Rank:          rank,
-			UUID:          lastFMArtist.Mbid,
-		}
-		// Not all artists have a UUID.
-		if artist.UUID == "" {
-			artist.UUID = uuid.New().String()
-		}
-		artists = append(artists, artist)
-	}
-	return artists
-}
 
 type Track struct {
 	AlbumName       string
