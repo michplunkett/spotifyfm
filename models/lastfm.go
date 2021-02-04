@@ -4,6 +4,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/shkh/lastfm-go/lastfm"
@@ -42,13 +43,38 @@ func UserGetTopArtistsToDomainArtists(artistList *lastfm.UserGetTopArtists) []Ar
 }
 
 type Track struct {
+	AlbumName       string
 	Artist          string
 	ArtistUUID      string
 	Duration        int
+	ListenDate      time.Time
 	LowerCaseArtist string
 	Name            string
 	PlayCount       int
 	Rank            int
+	SpotifyID       string
+}
+
+func UserGetRecentTracksToDomainTracks(trackList *lastfm.UserGetRecentTracks) []Track {
+	tracks := make([]Track, 0)
+	for _, lastFMTrack := range trackList.Tracks {
+		i, err := strconv.ParseInt(lastFMTrack.Date.Uts, 10, 64)
+		if err != nil {
+			panic(err)
+		}
+		listenDate := time.Unix(i, 0)
+
+		track := Track{
+			AlbumName:       lastFMTrack.Album.Name,
+			Artist:          lastFMTrack.Artist.Name,
+			ArtistUUID:      lastFMTrack.Artist.Mbid,
+			ListenDate:      listenDate,
+			LowerCaseArtist: removeNonWordCharacters(strings.ToLower(lastFMTrack.Artist.Name)),
+			Name:            lastFMTrack.Name,
+		}
+		tracks = append(tracks, track)
+	}
+	return tracks
 }
 
 func UserGetTopTracksToDomainTracks(trackList *lastfm.UserGetTopTracks) []Track {
