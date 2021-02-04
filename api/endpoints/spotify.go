@@ -77,11 +77,10 @@ func (handler *spotifyHandler) GetAllTopArtists(timeRange string) []spotify.Full
 
 func (handler *spotifyHandler) GetAudioFeaturesOfTrack(trackID spotify.ID) *spotify.AudioFeatures {
 	audioFeatures, _ := handler.client.GetAudioFeatures(trackID)
-	var features *spotify.AudioFeatures
 	if len(audioFeatures) > 0 {
-		features = audioFeatures[0]
+		return audioFeatures[0]
 	}
-	return features
+	return nil
 }
 
 func (handler *spotifyHandler) SearchForSong(songName, songArtist string) *spotify.FullTrack {
@@ -91,9 +90,8 @@ func (handler *spotifyHandler) SearchForSong(songName, songArtist string) *spoti
 		Limit: &limit,
 	}
 	result, _ := handler.client.SearchOpt(queryString, spotify.SearchTypeTrack, &options)
-	var track *spotify.FullTrack
 	if len(result.Tracks.Tracks) > 0 {
-		track = &result.Tracks.Tracks[0]
+		return &result.Tracks.Tracks[0]
 	}
-	return track
+	return nil
 }
