@@ -3,7 +3,7 @@ package constants
 const (
 	// General
 	EmptyString    = ""
-	APIObjectLimit = 300
+	APIObjectLimit = 200
 
 	// Last.fm credential names
 	LastFMApiKey       = "LAST_FM_API_KEY"
