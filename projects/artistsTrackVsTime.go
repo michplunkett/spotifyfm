@@ -40,8 +40,8 @@ func (a *artistsTrackVsTime) Execute() {
 }
 
 func (a *artistsTrackVsTime) getInformation() {
-	a.tracks = a.handler.GetAllTopTracks(constants.APIObjectLimit, a.timeSpan, a.userName)
-	a.lastFMSortedArtists = a.handler.GetAllTopArtists(constants.APIObjectLimit, a.timeSpan, a.userName)
+	a.tracks = a.handler.GetAllTopTracks(a.timeSpan, a.userName)
+	a.lastFMSortedArtists = a.handler.GetAllTopArtists(a.timeSpan, a.userName)
 
 	// UUIDs are mapped to their respective artist's lower case name.
 	artistNameToUUIDHash := make(map[string]string, 0)
