@@ -1,4 +1,4 @@
-package lastfm
+package projects
 
 import (
 	"fmt"
@@ -8,11 +8,6 @@ import (
 	"github.com/michplunkett/spotifyfm/models"
 	"github.com/michplunkett/spotifyfm/util/constants"
 )
-
-// There are some artists that have aliases in last.fm
-var problematicArtistMapping = map[string]string{
-	"strfkr": "starfucker",
-}
 
 type ArtistsTrackVsTime interface {
 	Execute()
@@ -45,8 +40,8 @@ func (a *artistsTrackVsTime) Execute() {
 }
 
 func (a *artistsTrackVsTime) getInformation() {
-	a.tracks = a.handler.GetAllTopTracks(constants.APIObjectLimit, a.timeSpan, a.userName)
-	a.lastFMSortedArtists = a.handler.GetAllTopArtists(constants.APIObjectLimit, a.timeSpan, a.userName)
+	a.tracks = a.handler.GetAllTopTracks(a.timeSpan, a.userName)
+	a.lastFMSortedArtists = a.handler.GetAllTopArtists(a.timeSpan, a.userName)
 
 	// UUIDs are mapped to their respective artist's lower case name.
 	artistNameToUUIDHash := make(map[string]string, 0)
@@ -63,7 +58,7 @@ func (a *artistsTrackVsTime) getInformation() {
 				track.ArtistUUID = uuid
 				a.tracks[idx] = track
 			} else {
-				if hashName, ok := problematicArtistMapping[track.LowerCaseArtist]; ok {
+				if hashName, ok := constants.ProblematicArtistMapping[track.LowerCaseArtist]; ok {
 					if uuid, ok := artistNameToUUIDHash[hashName]; ok {
 						track.ArtistUUID = uuid
 						a.tracks[idx] = track
@@ -90,9 +85,6 @@ func (a *artistsTrackVsTime) doCalculations() {
 			// The total time listened to one song is its duration * number of times played.
 			artist += track.Duration * track.PlayCount
 			artistsDurationHash[track.ArtistUUID] = artist
-		} else {
-			// Print track if it does not have a present artist.
-			fmt.Println(track)
 		}
 	}
 

@@ -1,9 +1,12 @@
 package constants
 
+import "time"
+
 const (
 	// General
+	APIObjectLimit = 200
 	EmptyString    = ""
-	APIObjectLimit = 300
+	NotFound       = "NF"
 
 	// Last.fm credential names
 	LastFMApiKey       = "LAST_FM_API_KEY"
@@ -25,4 +28,15 @@ const (
 	SpotifyPeriodLong   = "long"
 	SpotifyPeriodMedium = "medium"
 	SpotifyPeriodShort  = "short"
+)
+
+var (
+	// There are some artists that have aliases in last.fm
+	ProblematicArtistMapping = map[string]string{
+		"strfkr":   "starfucker",
+		"th1rt3en": "thirteen",
+	}
+	Now          = time.Now()
+	StartOfMonth = time.Date(Now.Year(), Now.Month(), 1, 0, 0, 0, 0, Now.Location()).Unix()
+	StartOf2020  = time.Date(2020, time.January, 1, 0, 0, 0, 0, Now.Location()).Unix()
 )
