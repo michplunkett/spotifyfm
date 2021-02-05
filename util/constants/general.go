@@ -4,8 +4,9 @@ import "time"
 
 const (
 	// General
-	EmptyString    = ""
 	APIObjectLimit = 200
+	EmptyString    = ""
+	NotFound       = "NF"
 
 	// Last.fm credential names
 	LastFMApiKey       = "LAST_FM_API_KEY"
@@ -36,6 +37,6 @@ var (
 		"th1rt3en": "thirteen",
 	}
 	now          = time.Now()
-	StartOfMonth = time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location()).Unix()
+	StartOfMonth = time.Date(now.Year(), time.January, 1, 0, 0, 0, 0, now.Location()).Unix()
 	StartOf2020  = time.Date(2020, time.January, 1, 0, 0, 0, 0, now.Location()).Unix()
 )

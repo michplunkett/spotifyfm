@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/shkh/lastfm-go/lastfm"
+	"github.com/zmb3/spotify"
 
 	"github.com/michplunkett/spotifyfm/util/constants"
 )
@@ -21,7 +22,7 @@ type Track struct {
 	Name            string
 	PlayCount       int
 	Rank            int
-	SpotifyID       string
+	SpotifyID       spotify.ID
 }
 
 func UserGetRecentTracksToDomainTracks(trackList *lastfm.UserGetRecentTracks) []Track {
