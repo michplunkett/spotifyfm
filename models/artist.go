@@ -2,7 +2,6 @@ package models
 
 import (
 	"strconv"
-	"strings"
 
 	"github.com/google/uuid"
 	"github.com/shkh/lastfm-go/lastfm"
@@ -24,7 +23,7 @@ func UserGetTopArtistsToDomainArtists(artistList *lastfm.UserGetTopArtists) []Ar
 		rank, _ := strconv.Atoi(lastFMArtist.Rank)
 		artist := Artist{
 			Name:          lastFMArtist.Name,
-			LowerCaseName: removeNonWordCharacters(strings.ToLower(lastFMArtist.Name)),
+			LowerCaseName: RemoveNonWordCharacters(lastFMArtist.Name),
 			PlayCount:     playCount,
 			Rank:          rank,
 			UUID:          lastFMArtist.Mbid,

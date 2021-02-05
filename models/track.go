@@ -43,7 +43,7 @@ func UserGetRecentTracksToDomainTracks(trackList *lastfm.UserGetRecentTracks) []
 			Artist:          lastFMTrack.Artist.Name,
 			ArtistUUID:      lastFMTrack.Artist.Mbid,
 			ListenDate:      listenDate,
-			LowerCaseArtist: removeNonWordCharacters(strings.ToLower(lastFMTrack.Artist.Name)),
+			LowerCaseArtist: RemoveNonWordCharacters(lastFMTrack.Artist.Name),
 			Name:            lastFMTrack.Name,
 		}
 		tracks = append(tracks, track)
@@ -71,7 +71,7 @@ func UserGetTopTracksToDomainTracks(trackList *lastfm.UserGetTopTracks) []Track 
 			Artist:          lastFMTrack.Artist.Name,
 			ArtistUUID:      lastFMTrack.Artist.Mbid,
 			Duration:        duration,
-			LowerCaseArtist: removeNonWordCharacters(strings.ToLower(lastFMTrack.Artist.Name)),
+			LowerCaseArtist: RemoveNonWordCharacters(lastFMTrack.Artist.Name),
 			Name:            lastFMTrack.Name,
 			PlayCount:       playCount,
 			Rank:            rank,
@@ -83,6 +83,6 @@ func UserGetTopTracksToDomainTracks(trackList *lastfm.UserGetTopTracks) []Track 
 
 var regEx, _ = regexp.Compile("[^a-zA-Z0-9]+")
 
-func removeNonWordCharacters(name string) string {
-	return regEx.ReplaceAllString(name, constants.EmptyString)
+func RemoveNonWordCharacters(name string) string {
+	return regEx.ReplaceAllString(strings.ToLower(name), constants.EmptyString)
 }

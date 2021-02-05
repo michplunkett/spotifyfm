@@ -44,13 +44,13 @@ func (getInfo *getRecentTrackInformation) getInformation() {
 		searchResult := getInfo.spotifyHandler.SearchForSong(track.Artist, track.AlbumName, track.Name)
 		if searchResult != nil {
 			if strings.ToLower(searchResult.Name) == strings.ToLower(track.Name) &&
-				strings.ToLower(searchResult.Artists[0].Name) == strings.ToLower(track.Artist) {
+				models.RemoveNonWordCharacters(searchResult.Artists[0].Name) == track.LowerCaseArtist {
 				trackIDs = append(trackIDs, searchResult.ID)
 			} else {
 				fmt.Println("--- Count not match in search ---")
 				fmt.Println("index: ", i)
-				fmt.Println("search string: " + track.Artist + " " + track.AlbumName + " " + track.Name)
-				fmt.Println(searchResult.Artists[0].Name, searchResult.Album.Name, searchResult.Name)
+				fmt.Println("search string: " + track.LowerCaseArtist + " " + track.AlbumName + " " + track.Name)
+				fmt.Println(models.RemoveNonWordCharacters(searchResult.Artists[0].Name), searchResult.Album.Name, searchResult.Name)
 				couldNotMatchInSearch += 1
 			}
 		} else {
