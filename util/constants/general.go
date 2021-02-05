@@ -1,5 +1,7 @@
 package constants
 
+import "time"
+
 const (
 	// General
 	EmptyString    = ""
@@ -27,8 +29,13 @@ const (
 	SpotifyPeriodShort  = "short"
 )
 
-// There are some artists that have aliases in last.fm
-var ProblematicArtistMapping = map[string]string{
-	"strfkr":   "starfucker",
-	"th1rt3en": "thirteen",
-}
+var (
+	// There are some artists that have aliases in last.fm
+	ProblematicArtistMapping = map[string]string{
+		"strfkr":   "starfucker",
+		"th1rt3en": "thirteen",
+	}
+	now          = time.Now()
+	StartOfMonth = time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location()).Unix()
+	StartOf2020  = time.Date(2020, time.January, 1, 0, 0, 0, 0, now.Location()).Unix()
+)

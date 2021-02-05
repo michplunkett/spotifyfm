@@ -1,8 +1,6 @@
 package endpoints
 
 import (
-	"time"
-
 	"github.com/shkh/lastfm-go/lastfm"
 
 	"github.com/michplunkett/spotifyfm/models"
@@ -10,7 +8,7 @@ import (
 )
 
 type LastFMHandler interface {
-	GetAllRecentTracks(from time.Time, userName string) []models.Track
+	GetAllRecentTracks(from int64, userName string) []models.Track
 	GetAllTopArtists(period, userName string) []models.Artist
 	GetAllTopTracks(period, userName string) []models.Track
 	GetCurrentTrack(userName string) *lastfm.UserGetRecentTracks
@@ -27,7 +25,7 @@ func NewLastFMHandler(api *lastfm.Api) LastFMHandler {
 	}
 }
 
-func (handler *lastFMHandler) GetAllRecentTracks(from time.Time, userName string) []models.Track {
+func (handler *lastFMHandler) GetAllRecentTracks(from int64, userName string) []models.Track {
 	tracks := make([]models.Track, 0)
 
 	page := 1
@@ -86,7 +84,7 @@ func (handler *lastFMHandler) GetCurrentTrack(userName string) *lastfm.UserGetRe
 	return &currentTrack
 }
 
-func (handler *lastFMHandler) getRecentTracks(from time.Time, limit, page int, userName string) *lastfm.UserGetRecentTracks {
+func (handler *lastFMHandler) getRecentTracks(from int64, limit, page int, userName string) *lastfm.UserGetRecentTracks {
 	topArtistsParam := make(map[string]interface{})
 	topArtistsParam["from"] = from
 	topArtistsParam["limit"] = limit
