@@ -13,7 +13,7 @@ type SpotifyHandler interface {
 	GetCurrentlyPlaying() *spotify.CurrentlyPlaying
 	GetAllTopTracks(timeRange string) []spotify.FullTrack
 	GetAllTopArtists(timeRange string) []spotify.FullArtist
-	GetAudioFeaturesOfTrack(trackID spotify.ID) *spotify.AudioFeatures
+	GetAudioFeaturesOfTrack(trackIDs []spotify.ID) []*spotify.AudioFeatures
 	SearchForSong(songName, albumName, artistName string) []spotify.FullTrack
 }
 
@@ -75,10 +75,10 @@ func (handler *spotifyHandler) GetAllTopArtists(timeRange string) []spotify.Full
 	return handler.getTopArtists(timeRange, pageSizeConst)
 }
 
-func (handler *spotifyHandler) GetAudioFeaturesOfTrack(trackID spotify.ID) *spotify.AudioFeatures {
-	audioFeatures, _ := handler.client.GetAudioFeatures(trackID)
+func (handler *spotifyHandler) GetAudioFeaturesOfTrack(trackIDs []spotify.ID) []*spotify.AudioFeatures {
+	audioFeatures, _ := handler.client.GetAudioFeatures(trackIDs...)
 	if len(audioFeatures) > 0 {
-		return audioFeatures[0]
+		return audioFeatures
 	}
 	return nil
 }
