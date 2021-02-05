@@ -44,7 +44,7 @@ func (getInfo *getRecentTrackInformation) getInformation() {
 	couldNotMatchInSearch := 0
 	trackToIDHash := make(map[string]spotify.ID, 0)
 	for i, track := range getInfo.tracksForDuration {
-		if i%500 == 0 {
+		if i != 0 && i%500 == 0 {
 			fmt.Println("Sleepin' for 30 seconds so Spotify doesn't hate me.")
 			time.Sleep(30 * time.Second)
 		}
