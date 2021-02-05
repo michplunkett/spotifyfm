@@ -39,7 +39,6 @@ func (handler *lastFMAuthHandler) Authenticate() *lastfm.Api {
 		http.HandleFunc("/lastfm-callback", handler.finishAuthentication)
 		authRequestUrl := handler.api.GetAuthRequestUrl(constants.LastFMRedirectURL)
 
-		//fmt.Println("Opening the LastFM authorization URL in your browser:", authRequestUrl)
 		browser.OpenURL(authRequestUrl)
 
 		err := <-channelErr
