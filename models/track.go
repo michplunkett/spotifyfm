@@ -17,7 +17,7 @@ type Track struct {
 	Artist          string
 	ArtistUUID      string
 	Duration        int
-	ListenDate      int64
+	ListenDate      time.Time
 	LowerCaseArtist string
 	Name            string
 	PlayCount       int
@@ -28,15 +28,15 @@ type Track struct {
 func UserGetRecentTracksToDomainTracks(trackList *lastfm.UserGetRecentTracks) []Track {
 	tracks := make([]Track, 0)
 	for _, lastFMTrack := range trackList.Tracks {
-		var listenDate int64
-		var err error
+		var listenDate time.Time
 		if lastFMTrack.Date.Uts != constants.EmptyString {
-			listenDate, err = strconv.ParseInt(lastFMTrack.Date.Uts, 10, 64)
+			utcInt64, err := strconv.ParseInt(lastFMTrack.Date.Uts, 10, 64)
 			if err != nil {
 				panic(err)
 			}
+			listenDate = time.Unix(utcInt64, 0)
 		} else {
-			listenDate = time.Now().Unix()
+			listenDate = time.Now()
 		}
 
 		track := Track{

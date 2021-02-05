@@ -1,7 +1,11 @@
 package projects
 
 import (
+	"bufio"
 	"fmt"
+	"log"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/zmb3/spotify"
@@ -20,7 +24,7 @@ type getRecentTrackInformation struct {
 	lastFMHandler     endpoints.LastFMHandler
 	tracksForDuration []models.Track
 	spotifyHandler    endpoints.SpotifyHandler
-	audioFeatures     []*spotify.AudioFeatures
+	audioFeatures     map[spotify.ID]*spotify.AudioFeatures
 }
 
 func NewGetRecentTrackInformation(fromDate int64, lastFMHandler endpoints.LastFMHandler, spotifyHandler endpoints.SpotifyHandler) GetRecentTrackInformation {
@@ -29,12 +33,13 @@ func NewGetRecentTrackInformation(fromDate int64, lastFMHandler endpoints.LastFM
 		lastFMHandler:     lastFMHandler,
 		tracksForDuration: make([]models.Track, 0),
 		spotifyHandler:    spotifyHandler,
-		audioFeatures:     make([]*spotify.AudioFeatures, 0),
+		audioFeatures:     make(map[spotify.ID]*spotify.AudioFeatures, 0),
 	}
 }
 
 func (getInfo *getRecentTrackInformation) Execute() {
 	getInfo.getInformation()
+	getInfo.printoutResults()
 }
 
 func (getInfo *getRecentTrackInformation) getInformation() {
@@ -43,63 +48,132 @@ func (getInfo *getRecentTrackInformation) getInformation() {
 	couldNotFindInSearch := 0
 	couldNotMatchInSearch := 0
 	trackToIDHash := make(map[string]spotify.ID, 0)
-	for i, track := range getInfo.tracksForDuration {
-		if i != 0 && i%500 == 0 {
-			fmt.Println("Sleepin' for 30 seconds so Spotify doesn't hate me.")
-			time.Sleep(30 * time.Second)
+	for i, t := range getInfo.tracksForDuration {
+		if i != 0 && i%250 == 0 {
+			fmt.Println("Sleepin' for 15 seconds so Spotify doesn't hate me.")
+			time.Sleep(15 * time.Second)
 		}
 
-		searchKey := track.Artist + " " + track.AlbumName + " " + track.Name
+		searchKey := t.Artist + " " + t.AlbumName + " " + t.Name
 		if value, ok := trackToIDHash[searchKey]; ok {
 			if value != constants.NotFound {
-				track.SpotifyID = value
-				getInfo.tracksForDuration[i] = track
+				t.SpotifyID = value
+				getInfo.tracksForDuration[i] = t
 			} else {
-				track.SpotifyID = constants.NotFound
-				getInfo.tracksForDuration[i] = track
+				t.SpotifyID = constants.NotFound
+				getInfo.tracksForDuration[i] = t
 			}
 			continue
 		}
 
-		searchResult := getInfo.spotifyHandler.SearchForSong(track.Artist, track.AlbumName, track.Name)
+		searchResult := getInfo.spotifyHandler.SearchForSong(t.Artist, t.AlbumName, t.Name)
 		if searchResult != nil {
-			comparisonResult := compareMultipleReturnedTracks(track, searchResult)
+			comparisonResult := compareMultipleReturnedTracks(t, searchResult)
 			if comparisonResult != constants.EmptyString {
 				trackIDs = append(trackIDs, comparisonResult)
-				track.SpotifyID = comparisonResult
-				getInfo.tracksForDuration[i] = track
+				t.SpotifyID = comparisonResult
+				getInfo.tracksForDuration[i] = t
 				trackToIDHash[searchKey] = comparisonResult
 			} else {
 				fmt.Println("--- Count not match in search ---")
 				fmt.Println("index: ", i)
 				fmt.Println("search string: " + searchKey)
 				fmt.Println(searchResult)
-				track.SpotifyID = constants.NotFound
+				t.SpotifyID = constants.NotFound
 				trackToIDHash[searchKey] = constants.NotFound
-				getInfo.tracksForDuration[i] = track
+				getInfo.tracksForDuration[i] = t
 				couldNotMatchInSearch += 1
 			}
 		} else {
 			fmt.Println("--- Count not find in search ---")
 			fmt.Println("index: ", i)
 			fmt.Println("search string: " + searchKey)
-			track.SpotifyID = constants.NotFound
+			t.SpotifyID = constants.NotFound
 			trackToIDHash[searchKey] = constants.NotFound
-			getInfo.tracksForDuration[i] = track
+			getInfo.tracksForDuration[i] = t
 			couldNotFindInSearch += 1
 		}
 	}
+	fmt.Println("-----------------------------")
 	fmt.Println("Could not match in search: ", couldNotMatchInSearch)
 	fmt.Println("Could not find in search: ", couldNotFindInSearch)
 	fmt.Println("Total tracks: ", len(getInfo.tracksForDuration))
-}
+	fmt.Println("Sleepin' for 30 seconds before I start getting audio features from Spotify.")
+	fmt.Println("-----------------------------")
+	time.Sleep(30 * time.Second)
 
-func (getInfo *getRecentTrackInformation) doCalculations() {
+	for i := 0; i < len(trackIDs); {
+		upperLimit := i + 50
+		if upperLimit > len(trackIDs) {
+			upperLimit = len(trackIDs)
+		}
+		audioFeatures := getInfo.spotifyHandler.GetAudioFeaturesOfTrack(trackIDs[i:upperLimit])
+		for _, a := range audioFeatures {
+			if _, ok := getInfo.audioFeatures[a.ID]; !ok {
+				getInfo.audioFeatures[a.ID] = a
+			}
+		}
+		i += 50
+	}
+	if _, ok := getInfo.audioFeatures[constants.NotFound]; !ok {
+		getInfo.audioFeatures[constants.NotFound] = &spotify.AudioFeatures{}
+	}
 
+	fmt.Println("-----------------------------")
+	fmt.Println("Length of array: ", len(trackIDs))
+	fmt.Println("Length of map: ", len(getInfo.audioFeatures))
 }
 
 func (getInfo *getRecentTrackInformation) printoutResults() {
+	f, err := os.Create("audioFeaturesTimeSeries_" + constants.Now.Format("20060102150405") + ".txt")
+	if err != nil {
+		log.Fatalf("failed creating file: %s", err)
+	}
+	dataWriter := bufio.NewWriter(f)
 
+	_, _ = dataWriter.WriteString("ListenDate\tTrack\tAlbum\tArtist\tDuration(S)\tSpotifyID\tAcousticness\tDanceability\tEnergy\tInstrumentalness\tLiveness\tLoudness\tSpeechiness\tTempo\tValence\n")
+	for _, t := range getInfo.tracksForDuration {
+		var af *spotify.AudioFeatures
+		var ok bool
+		if af, ok = getInfo.audioFeatures[t.SpotifyID]; !ok {
+			fmt.Println("Audio features don't exist for : ", t)
+		}
+		trackStringArray := make([]string, 0)
+		// Listen Date
+		listenDate := t.ListenDate.Format(time.RFC3339)
+		trackStringArray = append(trackStringArray, listenDate)
+		// Track
+		trackStringArray = append(trackStringArray, t.Name)
+		// Album
+		trackStringArray = append(trackStringArray, t.AlbumName)
+		// Duration
+		trackStringArray = append(trackStringArray, fmt.Sprintf("%f", time.Duration(af.Duration).Seconds()))
+		// SpotifyID
+		trackStringArray = append(trackStringArray, string(af.ID))
+		// Acousticness
+		trackStringArray = append(trackStringArray, string(af.ID))
+		// Danceability
+		trackStringArray = append(trackStringArray, fmt.Sprintf("%f", af.Danceability))
+		// Energy
+		trackStringArray = append(trackStringArray, fmt.Sprintf("%f", af.Energy))
+		// Instrumentalness
+		trackStringArray = append(trackStringArray, fmt.Sprintf("%f", af.Instrumentalness))
+		// Liveness
+		trackStringArray = append(trackStringArray, fmt.Sprintf("%f", af.Liveness))
+		// Loudness
+		trackStringArray = append(trackStringArray, fmt.Sprintf("%f", af.Loudness))
+		// Speechiness
+		trackStringArray = append(trackStringArray, fmt.Sprintf("%f", af.Speechiness))
+		// Tempo
+		trackStringArray = append(trackStringArray, fmt.Sprintf("%f", af.Tempo))
+		// Valence
+		trackStringArray = append(trackStringArray, fmt.Sprintf("%f", af.Valence))
+
+		_, _ = dataWriter.WriteString(strings.Join(trackStringArray[:], "\t") + "\n")
+	}
+
+	_ = dataWriter.Flush()
+	_ = f.Close()
 }
 
 func compareMultipleReturnedTracks(localTrack models.Track, searchTracks []spotify.FullTrack) spotify.ID {

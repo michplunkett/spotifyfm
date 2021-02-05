@@ -36,7 +36,7 @@ var (
 		"strfkr":   "starfucker",
 		"th1rt3en": "thirteen",
 	}
-	now          = time.Now()
-	StartOfMonth = time.Date(now.Year(), time.January, 1, 0, 0, 0, 0, now.Location()).Unix()
-	StartOf2020  = time.Date(2020, time.January, 1, 0, 0, 0, 0, now.Location()).Unix()
+	Now          = time.Now()
+	StartOfMonth = time.Date(Now.Year(), Now.Month(), 1, 0, 0, 0, 0, Now.Location()).Unix()
+	StartOf2020  = time.Date(2020, time.January, 1, 0, 0, 0, 0, Now.Location()).Unix()
 )
