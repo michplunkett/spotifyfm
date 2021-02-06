@@ -52,10 +52,10 @@ func (getInfo *getRecentTrackInformation) getInformation() {
 	trackToIDHash := make(map[string]spotify.ID, 0)
 	for i := 0; i < len(getInfo.tracksForDuration); {
 		t := getInfo.tracksForDuration[i]
-		if i != 0 && i%500 == 0 {
-			fmt.Println("Sleepin' for 15 seconds so Spotify doesn't hate me.")
+		if i != 0 && i%1000 == 0 {
+			fmt.Println("5 second search sleep")
 			fmt.Println("Search index: ", i)
-			time.Sleep(15 * time.Second)
+			time.Sleep(5 * time.Second)
 		}
 
 		searchKey := t.Artist + " " + t.AlbumName + " " + t.Name
@@ -73,9 +73,9 @@ func (getInfo *getRecentTrackInformation) getInformation() {
 
 		searchResult, err := getInfo.spotifyHandler.SearchForSong(t.Artist, t.AlbumName, t.Name)
 		if err != nil {
-			fmt.Println("Sleepin' for 30 seconds because Spotify DOES hate me.")
+			fmt.Println("10 second search error sleep")
 			fmt.Println("Search error index: ", i)
-			time.Sleep(30 * time.Second)
+			time.Sleep(10 * time.Second)
 			continue
 		}
 		if searchResult != nil {
@@ -110,9 +110,9 @@ func (getInfo *getRecentTrackInformation) getInformation() {
 	fmt.Println("Could not match in search: ", couldNotMatchInSearch)
 	fmt.Println("Could not find in search: ", couldNotFindInSearch)
 	fmt.Println("Total tracks: ", len(getInfo.tracksForDuration))
-	fmt.Println("Sleepin' for 30 seconds before I start getting audio features from Spotify.")
+	fmt.Println("10 refresh sleep")
+	time.Sleep(10 * time.Second)
 	fmt.Println("-----------------------------")
-	time.Sleep(30 * time.Second)
 
 	for i := 0; i < len(trackIDs); {
 		upperLimit := i + 50
@@ -126,7 +126,7 @@ func (getInfo *getRecentTrackInformation) getInformation() {
 			}
 		}
 		if i != 0 && i%500 == 0 {
-			fmt.Println("Sleepin' for 5 seconds so Spotify doesn't hate me.")
+			fmt.Println("5 second audio feature sleep")
 			fmt.Println("AudioFeatures index: ", i)
 			time.Sleep(5 * time.Second)
 		}
