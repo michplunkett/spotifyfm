@@ -37,6 +37,6 @@ var (
 		"th1rt3en": "thirteen",
 	}
 	Now          = time.Now()
-	StartOfMonth = time.Date(Now.Year(), Now.Month(), 1, 0, 0, 0, 0, Now.Location()).Unix()
+	StartOfMonth = time.Date(Now.Year(), time.January, 1, 0, 0, 0, 0, Now.Location()).Unix()
 	StartOf2020  = time.Date(2020, time.January, 1, 0, 0, 0, 0, Now.Location()).Unix()
 )

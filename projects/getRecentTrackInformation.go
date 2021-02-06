@@ -48,7 +48,8 @@ func (getInfo *getRecentTrackInformation) getInformation() {
 	couldNotFindInSearch := 0
 	couldNotMatchInSearch := 0
 	trackToIDHash := make(map[string]spotify.ID, 0)
-	for i, t := range getInfo.tracksForDuration {
+	for i := 0; i < len(getInfo.tracksForDuration); {
+		t := getInfo.tracksForDuration[i]
 		if i != 0 && i%250 == 0 {
 			fmt.Println("Sleepin' for 15 seconds so Spotify doesn't hate me.")
 			time.Sleep(15 * time.Second)
@@ -63,10 +64,16 @@ func (getInfo *getRecentTrackInformation) getInformation() {
 				t.SpotifyID = constants.NotFound
 				getInfo.tracksForDuration[i] = t
 			}
+			i += 1
 			continue
 		}
 
-		searchResult := getInfo.spotifyHandler.SearchForSong(t.Artist, t.AlbumName, t.Name)
+		searchResult, err := getInfo.spotifyHandler.SearchForSong(t.Artist, t.AlbumName, t.Name)
+		if err != nil {
+			fmt.Println("Sleepin' for 30 seconds because Spotify DOES hate me.")
+			time.Sleep(30 * time.Second)
+			continue
+		}
 		if searchResult != nil {
 			comparisonResult := compareMultipleReturnedTracks(t, searchResult)
 			if comparisonResult != constants.EmptyString {
@@ -93,6 +100,7 @@ func (getInfo *getRecentTrackInformation) getInformation() {
 			getInfo.tracksForDuration[i] = t
 			couldNotFindInSearch += 1
 		}
+		i += 1
 	}
 	fmt.Println("-----------------------------")
 	fmt.Println("Could not match in search: ", couldNotMatchInSearch)
@@ -146,6 +154,8 @@ func (getInfo *getRecentTrackInformation) printoutResults() {
 		trackStringArray = append(trackStringArray, t.Name)
 		// Album
 		trackStringArray = append(trackStringArray, t.AlbumName)
+		// Artist
+		trackStringArray = append(trackStringArray, t.Artist)
 		// Duration
 		trackStringArray = append(trackStringArray, fmt.Sprintf("%f", time.Duration(af.Duration).Seconds()))
 		// SpotifyID

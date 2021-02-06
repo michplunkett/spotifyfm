@@ -14,7 +14,7 @@ type SpotifyHandler interface {
 	GetAllTopTracks(timeRange string) []spotify.FullTrack
 	GetAllTopArtists(timeRange string) []spotify.FullArtist
 	GetAudioFeaturesOfTrack(trackIDs []spotify.ID) []*spotify.AudioFeatures
-	SearchForSong(songName, albumName, artistName string) []spotify.FullTrack
+	SearchForSong(songName, albumName, artistName string) ([]spotify.FullTrack, error)
 }
 
 type spotifyHandler struct {
@@ -83,15 +83,15 @@ func (handler *spotifyHandler) GetAudioFeaturesOfTrack(trackIDs []spotify.ID) []
 	return nil
 }
 
-func (handler *spotifyHandler) SearchForSong(artistName, albumName, songName string) []spotify.FullTrack {
+func (handler *spotifyHandler) SearchForSong(artistName, albumName, songName string) ([]spotify.FullTrack, error) {
 	queryString := artistName + " " + albumName + " " + songName
 	limit := 3
 	options := spotify.Options{
 		Limit: &limit,
 	}
-	result, _ := handler.client.SearchOpt(queryString, spotify.SearchTypeTrack, &options)
+	result, err := handler.client.SearchOpt(queryString, spotify.SearchTypeTrack, &options)
 	if result != nil && len(result.Tracks.Tracks) > 0 {
-		return result.Tracks.Tracks
+		return result.Tracks.Tracks, nil
 	}
-	return nil
+	return nil, err
 }
