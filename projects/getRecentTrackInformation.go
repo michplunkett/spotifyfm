@@ -44,14 +44,17 @@ func (getInfo *getRecentTrackInformation) Execute() {
 
 func (getInfo *getRecentTrackInformation) getInformation() {
 	getInfo.tracksForDuration = getInfo.lastFMHandler.GetAllRecentTracks(getInfo.fromDate, getInfo.lastFMHandler.GetUserInfo().Name)
+	fmt.Println("-----------------------------")
+	fmt.Println("There are this many tracks: ", len(getInfo.tracksForDuration))
 	trackIDs := make([]spotify.ID, 0)
 	couldNotFindInSearch := 0
 	couldNotMatchInSearch := 0
 	trackToIDHash := make(map[string]spotify.ID, 0)
 	for i := 0; i < len(getInfo.tracksForDuration); {
 		t := getInfo.tracksForDuration[i]
-		if i != 0 && i%250 == 0 {
+		if i != 0 && i%500 == 0 {
 			fmt.Println("Sleepin' for 15 seconds so Spotify doesn't hate me.")
+			fmt.Println("Search index: ", i)
 			time.Sleep(15 * time.Second)
 		}
 
@@ -71,6 +74,7 @@ func (getInfo *getRecentTrackInformation) getInformation() {
 		searchResult, err := getInfo.spotifyHandler.SearchForSong(t.Artist, t.AlbumName, t.Name)
 		if err != nil {
 			fmt.Println("Sleepin' for 30 seconds because Spotify DOES hate me.")
+			fmt.Println("Search error index: ", i)
 			time.Sleep(30 * time.Second)
 			continue
 		}
@@ -82,19 +86,19 @@ func (getInfo *getRecentTrackInformation) getInformation() {
 				getInfo.tracksForDuration[i] = t
 				trackToIDHash[searchKey] = comparisonResult
 			} else {
-				fmt.Println("--- Count not match in search ---")
-				fmt.Println("index: ", i)
-				fmt.Println("search string: " + searchKey)
-				fmt.Println(searchResult)
+				//fmt.Println("--- Count not match in search ---")
+				//fmt.Println("index: ", i)
+				//fmt.Println("search string: " + searchKey)
+				//fmt.Println(searchResult)
 				t.SpotifyID = constants.NotFound
 				trackToIDHash[searchKey] = constants.NotFound
 				getInfo.tracksForDuration[i] = t
 				couldNotMatchInSearch += 1
 			}
 		} else {
-			fmt.Println("--- Count not find in search ---")
-			fmt.Println("index: ", i)
-			fmt.Println("search string: " + searchKey)
+			//fmt.Println("--- Count not find in search ---")
+			//fmt.Println("index: ", i)
+			//fmt.Println("search string: " + searchKey)
 			t.SpotifyID = constants.NotFound
 			trackToIDHash[searchKey] = constants.NotFound
 			getInfo.tracksForDuration[i] = t
@@ -121,15 +125,19 @@ func (getInfo *getRecentTrackInformation) getInformation() {
 				getInfo.audioFeatures[a.ID] = a
 			}
 		}
+		if i != 0 && i%200 == 0 {
+			fmt.Println("Sleepin' for 15 seconds so Spotify doesn't hate me.")
+			fmt.Println("AudioFeatures index: ", i)
+			time.Sleep(15 * time.Second)
+		}
 		i += 50
 	}
 	if _, ok := getInfo.audioFeatures[constants.NotFound]; !ok {
-		getInfo.audioFeatures[constants.NotFound] = &spotify.AudioFeatures{}
+		getInfo.audioFeatures[constants.NotFound] = nil
 	}
 
 	fmt.Println("-----------------------------")
-	fmt.Println("Length of array: ", len(trackIDs))
-	fmt.Println("Length of map: ", len(getInfo.audioFeatures))
+	fmt.Println("Total unique songs found: ", len(trackIDs))
 }
 
 func (getInfo *getRecentTrackInformation) printoutResults() {
@@ -141,11 +149,7 @@ func (getInfo *getRecentTrackInformation) printoutResults() {
 
 	_, _ = dataWriter.WriteString("ListenDate\tTrack\tAlbum\tArtist\tDuration(S)\tSpotifyID\tAcousticness\tDanceability\tEnergy\tInstrumentalness\tLiveness\tLoudness\tSpeechiness\tTempo\tValence\n")
 	for _, t := range getInfo.tracksForDuration {
-		var af *spotify.AudioFeatures
-		var ok bool
-		if af, ok = getInfo.audioFeatures[t.SpotifyID]; !ok {
-			fmt.Println("Audio features don't exist for : ", t)
-		}
+		af := getInfo.audioFeatures[t.SpotifyID]
 		trackStringArray := make([]string, 0)
 		// Listen Date
 		listenDate := t.ListenDate.Format(time.RFC3339)
@@ -157,32 +161,33 @@ func (getInfo *getRecentTrackInformation) printoutResults() {
 		// Artist
 		trackStringArray = append(trackStringArray, t.Artist)
 		// Duration
-		if af.Duration == 0 {
-			trackStringArray = append(trackStringArray, fmt.Sprintf("%f", 0))
+		if af == nil{
+			for i := 0; i < 10; i++ {
+				trackStringArray = append(trackStringArray, constants.DoubleHyphen)
+			}
 		} else {
 			trackStringArray = append(trackStringArray, fmt.Sprintf("%f", float64(af.Duration)/1000.00))
+			// SpotifyID
+			trackStringArray = append(trackStringArray, string(af.ID))
+			// Acousticness
+			trackStringArray = append(trackStringArray, fmt.Sprintf("%f", af.Acousticness))
+			// Danceability
+			trackStringArray = append(trackStringArray, fmt.Sprintf("%f", af.Danceability))
+			// Energy
+			trackStringArray = append(trackStringArray, fmt.Sprintf("%f", af.Energy))
+			// Instrumentalness
+			trackStringArray = append(trackStringArray, fmt.Sprintf("%f", af.Instrumentalness))
+			// Liveness
+			trackStringArray = append(trackStringArray, fmt.Sprintf("%f", af.Liveness))
+			// Loudness
+			trackStringArray = append(trackStringArray, fmt.Sprintf("%f", af.Loudness))
+			// Speechiness
+			trackStringArray = append(trackStringArray, fmt.Sprintf("%f", af.Speechiness))
+			// Tempo
+			trackStringArray = append(trackStringArray, fmt.Sprintf("%f", af.Tempo))
+			// Valence
+			trackStringArray = append(trackStringArray, fmt.Sprintf("%f", af.Valence))
 		}
-
-		// SpotifyID
-		trackStringArray = append(trackStringArray, string(af.ID))
-		// Acousticness
-		trackStringArray = append(trackStringArray, string(af.ID))
-		// Danceability
-		trackStringArray = append(trackStringArray, fmt.Sprintf("%f", af.Danceability))
-		// Energy
-		trackStringArray = append(trackStringArray, fmt.Sprintf("%f", af.Energy))
-		// Instrumentalness
-		trackStringArray = append(trackStringArray, fmt.Sprintf("%f", af.Instrumentalness))
-		// Liveness
-		trackStringArray = append(trackStringArray, fmt.Sprintf("%f", af.Liveness))
-		// Loudness
-		trackStringArray = append(trackStringArray, fmt.Sprintf("%f", af.Loudness))
-		// Speechiness
-		trackStringArray = append(trackStringArray, fmt.Sprintf("%f", af.Speechiness))
-		// Tempo
-		trackStringArray = append(trackStringArray, fmt.Sprintf("%f", af.Tempo))
-		// Valence
-		trackStringArray = append(trackStringArray, fmt.Sprintf("%f", af.Valence))
 
 		_, _ = dataWriter.WriteString(strings.Join(trackStringArray[:], "\t") + "\n")
 	}
