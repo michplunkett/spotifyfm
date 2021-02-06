@@ -125,10 +125,10 @@ func (getInfo *getRecentTrackInformation) getInformation() {
 				getInfo.audioFeatures[a.ID] = a
 			}
 		}
-		if i != 0 && i%200 == 0 {
-			fmt.Println("Sleepin' for 15 seconds so Spotify doesn't hate me.")
+		if i != 0 && i%500 == 0 {
+			fmt.Println("Sleepin' for 5 seconds so Spotify doesn't hate me.")
 			fmt.Println("AudioFeatures index: ", i)
-			time.Sleep(15 * time.Second)
+			time.Sleep(5 * time.Second)
 		}
 		i += 50
 	}
