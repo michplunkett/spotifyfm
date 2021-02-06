@@ -32,20 +32,6 @@ func main() {
 	spotifyUser := spotifyHandler.GetUserInfo()
 	fmt.Println("You are logged in as ", spotifyUser.DisplayName)
 
-	spotifyCurrentlyPlaying := spotifyHandler.GetCurrentlyPlaying()
-	// Check is here in case you are not actively listening to something.
-	if spotifyCurrentlyPlaying.Item != nil {
-		fmt.Println("This is the track you're currently playing ", spotifyCurrentlyPlaying.Item.Name)
-	}
-
-	spotifyTopTracks := spotifyHandler.GetAllTopTracks(constants.SpotifyPeriodShort)
-	fmt.Println("This is your top track ", spotifyTopTracks[0].SimpleTrack.Name)
-	fmt.Println("This many tracks ", len(spotifyTopTracks))
-
-	spotifyTopArtists := spotifyHandler.GetAllTopArtists(constants.SpotifyPeriodShort)
-	fmt.Println("This is your top artist ", spotifyTopArtists[0].Name)
-	fmt.Println("This many artists ", len(spotifyTopArtists))
-
 	lastFMAuth := authentication.NewLastFMAuthHandler(envVars)
 	lastFMClient := lastFMAuth.Authenticate()
 	lastFMHandler := endpoints.NewLastFMHandler(lastFMClient)
