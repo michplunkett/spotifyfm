@@ -157,7 +157,12 @@ func (getInfo *getRecentTrackInformation) printoutResults() {
 		// Artist
 		trackStringArray = append(trackStringArray, t.Artist)
 		// Duration
-		trackStringArray = append(trackStringArray, fmt.Sprintf("%f", time.Duration(af.Duration).Seconds()))
+		if af.Duration == 0 {
+			trackStringArray = append(trackStringArray, fmt.Sprintf("%f", 0))
+		} else {
+			trackStringArray = append(trackStringArray, fmt.Sprintf("%f", float64(af.Duration)/1000.00))
+		}
+
 		// SpotifyID
 		trackStringArray = append(trackStringArray, string(af.ID))
 		// Acousticness
