@@ -61,7 +61,7 @@ func UserGetTopTracksToDomainTracks(trackList *lastfm.UserGetTopTracks) []Track 
 		// Not all songs come with assigned durations.
 		if duration == 0 {
 			// Last.fm says the average length of a song is 3.5 minutes, 210 seconds.
-			duration = 210
+			duration = constants.AverageSongSeconds
 		}
 		// If the song is included, I presume it is on the list because it has been played AT LEAST once.
 		if playCount == 0 {
