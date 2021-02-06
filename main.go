@@ -57,5 +57,5 @@ func main() {
 	fmt.Println("You are logged in as ", lastFMUser.RealName)
 
 	//projects.NewArtistsTrackVsTime(lastFMHandler, constants.LastFMPeriod3Month, lastFMUser.Name).Execute()
-	projects.NewGetRecentTrackInformation(constants.StartOfMonth, lastFMHandler, spotifyHandler).Execute()
+	projects.NewGetRecentTrackInformation(constants.StartOf2021, lastFMHandler, spotifyHandler).Execute()
 }
