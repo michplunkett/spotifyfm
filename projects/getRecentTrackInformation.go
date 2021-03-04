@@ -150,6 +150,11 @@ func (getInfo *getRecentTrackInformation) printoutResults() {
 	_, _ = dataWriter.WriteString("ListenDate\tTrack\tAlbum\tArtist\tDuration(S)\tSpotifyID\tAcousticness\tDanceability\tEnergy\tInstrumentalness\tLiveness\tLoudness\tSpeechiness\tTempo\tValence\n")
 	for _, t := range getInfo.tracksForDuration {
 		af := getInfo.audioFeatures[t.SpotifyID]
+
+		if af == nil {
+			continue
+		}
+
 		trackStringArray := make([]string, 0)
 		// Listen Date
 		listenDate := t.ListenDate.Format(time.RFC3339)
@@ -161,33 +166,27 @@ func (getInfo *getRecentTrackInformation) printoutResults() {
 		// Artist
 		trackStringArray = append(trackStringArray, t.Artist)
 		// Duration
-		if af == nil{
-			for i := 0; i < 10; i++ {
-				trackStringArray = append(trackStringArray, constants.DoubleHyphen)
-			}
-		} else {
-			trackStringArray = append(trackStringArray, fmt.Sprintf("%f", float64(af.Duration)/1000.00))
-			// SpotifyID
-			trackStringArray = append(trackStringArray, string(af.ID))
-			// Acousticness
-			trackStringArray = append(trackStringArray, fmt.Sprintf("%f", af.Acousticness))
-			// Danceability
-			trackStringArray = append(trackStringArray, fmt.Sprintf("%f", af.Danceability))
-			// Energy
-			trackStringArray = append(trackStringArray, fmt.Sprintf("%f", af.Energy))
-			// Instrumentalness
-			trackStringArray = append(trackStringArray, fmt.Sprintf("%f", af.Instrumentalness))
-			// Liveness
-			trackStringArray = append(trackStringArray, fmt.Sprintf("%f", af.Liveness))
-			// Loudness
-			trackStringArray = append(trackStringArray, fmt.Sprintf("%f", af.Loudness))
-			// Speechiness
-			trackStringArray = append(trackStringArray, fmt.Sprintf("%f", af.Speechiness))
-			// Tempo
-			trackStringArray = append(trackStringArray, fmt.Sprintf("%f", af.Tempo))
-			// Valence
-			trackStringArray = append(trackStringArray, fmt.Sprintf("%f", af.Valence))
-		}
+		trackStringArray = append(trackStringArray, fmt.Sprintf("%f", float64(af.Duration)/1000.00))
+		// SpotifyID
+		trackStringArray = append(trackStringArray, string(af.ID))
+		// Acousticness
+		trackStringArray = append(trackStringArray, fmt.Sprintf("%f", af.Acousticness))
+		// Danceability
+		trackStringArray = append(trackStringArray, fmt.Sprintf("%f", af.Danceability))
+		// Energy
+		trackStringArray = append(trackStringArray, fmt.Sprintf("%f", af.Energy))
+		// Instrumentalness
+		trackStringArray = append(trackStringArray, fmt.Sprintf("%f", af.Instrumentalness))
+		// Liveness
+		trackStringArray = append(trackStringArray, fmt.Sprintf("%f", af.Liveness))
+		// Loudness
+		trackStringArray = append(trackStringArray, fmt.Sprintf("%f", af.Loudness))
+		// Speechiness
+		trackStringArray = append(trackStringArray, fmt.Sprintf("%f", af.Speechiness))
+		// Tempo
+		trackStringArray = append(trackStringArray, fmt.Sprintf("%f", af.Tempo))
+		// Valence
+		trackStringArray = append(trackStringArray, fmt.Sprintf("%f", af.Valence))
 
 		_, _ = dataWriter.WriteString(strings.Join(trackStringArray[:], "\t") + "\n")
 	}
