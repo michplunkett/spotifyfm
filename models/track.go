@@ -1,6 +1,8 @@
 package models
 
 import (
+	"encoding/json"
+	"io/ioutil"
 	"regexp"
 	"strconv"
 	"strings"
@@ -10,6 +12,11 @@ import (
 	"github.com/zmb3/spotify"
 
 	"github.com/michplunkett/spotifyfm/util/constants"
+)
+
+const (
+	songIDsFileName           = "spotifySearchStringToSongID.json"
+	songAudioFeaturesFileName = "spotifyIDToAudioFeature.json"
 )
 
 type Track struct {
@@ -86,4 +93,47 @@ var regEx, _ = regexp.Compile("[^a-zA-Z0-9]+")
 
 func RemoveNonWordCharacters(name string) string {
 	return regEx.ReplaceAllString(strings.ToLower(name), constants.EmptyString)
+}
+
+func GetSpotifySearchToSongIDs() map[string]spotify.ID {
+	searchToIDHash := make(map[string]spotify.ID, 0)
+
+	songIDFile, err := ioutil.ReadFile(songIDsFileName)
+	if err != nil {
+		return searchToIDHash
+	}
+
+	_ = json.Unmarshal(songIDFile, &searchToIDHash)
+
+	return searchToIDHash
+}
+
+func AddSpotifySearchToSongIDs(searchToID map[string]spotify.ID) {
+	validSearches := make(map[string]spotify.ID, 0)
+	for key, id := range searchToID {
+		if _, ok := validSearches[key]; !ok && id != constants.NotFound {
+			validSearches[key] = id
+		}
+	}
+
+	file, _ := json.MarshalIndent(validSearches, "", " ")
+	_ = ioutil.WriteFile(songIDsFileName, file, 0644)
+}
+
+func GetSpotifyIDToAudioFeatures() map[spotify.ID]*spotify.AudioFeatures {
+	audioFeatures := make(map[spotify.ID]*spotify.AudioFeatures, 0)
+
+	songIDFile, err := ioutil.ReadFile(songAudioFeaturesFileName)
+	if err != nil {
+		return audioFeatures
+	}
+
+	_ = json.Unmarshal(songIDFile, &audioFeatures)
+
+	return audioFeatures
+}
+
+func AddSpotifyIDToAudioFeatures(idToAudioFeatures map[spotify.ID]*spotify.AudioFeatures) {
+	file, _ := json.MarshalIndent(idToAudioFeatures, "", " ")
+	_ = ioutil.WriteFile(songAudioFeaturesFileName, file, 0644)
 }
