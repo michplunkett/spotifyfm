@@ -6,8 +6,8 @@ import (
 	"time"
 )
 
-var (
-	ConfigFileName = "config.json"
+const (
+	configFileName = "config.json"
 )
 
 type FileConfigs struct {
@@ -26,10 +26,10 @@ type SpotifyConfigs struct {
 }
 
 func GetConfigValues() *FileConfigs {
-	configFile, _ := ioutil.ReadFile(ConfigFileName)
+	configFile, _ := ioutil.ReadFile(configFileName)
 
 	configInfo := FileConfigs{}
-	json.Unmarshal(configFile, &configInfo)
+	_ = json.Unmarshal(configFile, &configInfo)
 
 	return &configInfo
 }
@@ -40,5 +40,5 @@ func (config *FileConfigs) SetConfigValues() {
 
 func setConfigFileValues(configValues *FileConfigs) {
 	file, _ := json.MarshalIndent(configValues, "", " ")
-	_ = ioutil.WriteFile(ConfigFileName, file, 0644)
+	_ = ioutil.WriteFile(configFileName, file, 0644)
 }
