@@ -52,7 +52,7 @@ func (getInfo *getRecentTrackInformation) getInformation() {
 	trackToIDHash := make(map[string]spotify.ID, 0)
 	for i := 0; i < len(getInfo.tracksForDuration); {
 		t := getInfo.tracksForDuration[i]
-		if i != 0 && i%1000 == 0 {
+		if i != 0 && i%5000 == 0 {
 			fmt.Println("5 second search sleep")
 			fmt.Println("Search index: ", i)
 			time.Sleep(5 * time.Second)
@@ -73,9 +73,9 @@ func (getInfo *getRecentTrackInformation) getInformation() {
 
 		searchResult, err := getInfo.spotifyHandler.SearchForSong(t.Artist, t.AlbumName, t.Name)
 		if err != nil {
-			fmt.Println("10 second search error sleep")
+			fmt.Println("5 second search error sleep")
 			fmt.Println("Search error index: ", i)
-			time.Sleep(10 * time.Second)
+			time.Sleep(5 * time.Second)
 			continue
 		}
 		if searchResult != nil {
@@ -125,7 +125,7 @@ func (getInfo *getRecentTrackInformation) getInformation() {
 				getInfo.audioFeatures[a.ID] = a
 			}
 		}
-		if i != 0 && i%500 == 0 {
+		if i != 0 && i%1000 == 0 {
 			fmt.Println("5 second audio feature sleep")
 			fmt.Println("AudioFeatures index: ", i)
 			time.Sleep(5 * time.Second)
