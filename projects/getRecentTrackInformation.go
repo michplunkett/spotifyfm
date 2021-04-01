@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-echarts/go-echarts/v2/charts"
 	"github.com/zmb3/spotify"
 
 	"github.com/michplunkett/spotifyfm/api/endpoints"
@@ -38,8 +39,9 @@ func NewGetRecentTrackInformation(fromDate int64, lastFMHandler endpoints.LastFM
 }
 
 func (getInfo *getRecentTrackInformation) Execute() {
-	getInfo.getInformation()
-	getInfo.printoutResults()
+	//getInfo.getInformation()
+	//getInfo.printoutResultsToTxt()
+	getInfo.printoutResultsToGraph()
 }
 
 func (getInfo *getRecentTrackInformation) getInformation() {
@@ -143,7 +145,7 @@ func (getInfo *getRecentTrackInformation) getInformation() {
 	fmt.Println("Searched for this many track IDs: ", len(nonCachedTrackIDs))
 }
 
-func (getInfo *getRecentTrackInformation) printoutResults() {
+func (getInfo *getRecentTrackInformation) printoutResultsToTxt() {
 	f, err := os.Create("audioFeaturesTimeSeries_" + constants.Now.Format("20060102150405") + ".txt")
 	if err != nil {
 		log.Fatalf("failed creating file: %s", err)
@@ -196,6 +198,12 @@ func (getInfo *getRecentTrackInformation) printoutResults() {
 
 	_ = dataWriter.Flush()
 	_ = f.Close()
+}
+
+func  (getInfo *getRecentTrackInformation) printoutResultsToGraph() {
+	bar := charts.NewBar()
+	f, _ := os.Create("bar.html")
+	_ = bar.Render(f)
 }
 
 func compareMultipleReturnedTracks(localTrack models.Track, searchTracks []spotify.FullTrack) spotify.ID {
