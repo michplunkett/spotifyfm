@@ -41,5 +41,7 @@ var (
 	Now              = time.Now()
 	StartOf2021      = time.Date(2021, time.January, 1, 0, 0, 0, 0, Now.Location()).Unix()
 	StartOf2020      = time.Date(2020, time.January, 1, 0, 0, 0, 0, Now.Location()).Unix()
+	StartOf2019      = time.Date(2019, time.January, 1, 0, 0, 0, 0, Now.Location()).Unix()
 	StartOfThisMonth = time.Date(Now.Year(), Now.Month(), 1, 0, 0, 0, 0, Now.Location()).Unix()
+	WFHStartDay      = time.Date(2020, time.March, 13, 0, 0, 0, 0, Now.Location())
 )
