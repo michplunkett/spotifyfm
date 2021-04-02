@@ -1,6 +1,9 @@
 package endpoints
 
 import (
+	"fmt"
+	"time"
+
 	"github.com/shkh/lastfm-go/lastfm"
 
 	"github.com/michplunkett/spotifyfm/models"
@@ -30,6 +33,10 @@ func (handler *lastFMHandler) GetAllRecentTracks(from int64, userName string) []
 
 	page := 1
 	for {
+		if (constants.APIObjectLimit * page) % 3000 == 0 {
+			fmt.Println("10 second sleep last.fm GetAllRecentTracks at index: ", constants.APIObjectLimit * page)
+			time.Sleep(5 * time.Second)
+		}
 		topTracks := handler.getRecentTracks(from, constants.APIObjectLimit, page, userName)
 		domainTracks := models.UserGetRecentTracksToDomainTracks(topTracks)
 		tracks = append(tracks, domainTracks...)
