@@ -8,6 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-echarts/go-echarts/v2/charts"
+	"github.com/go-echarts/go-echarts/v2/opts"
 	"github.com/zmb3/spotify"
 
 	"github.com/michplunkett/spotifyfm/api/endpoints"
@@ -39,7 +41,8 @@ func NewGetRecentTrackInformation(fromDate int64, lastFMHandler endpoints.LastFM
 
 func (getInfo *getRecentTrackInformation) Execute() {
 	getInfo.getInformation()
-	getInfo.printoutResults()
+	getInfo.printoutResultsToTxt()
+	getInfo.printoutResultsWFHValenceComparison()
 }
 
 func (getInfo *getRecentTrackInformation) getInformation() {
@@ -143,7 +146,7 @@ func (getInfo *getRecentTrackInformation) getInformation() {
 	fmt.Println("Searched for this many track IDs: ", len(nonCachedTrackIDs))
 }
 
-func (getInfo *getRecentTrackInformation) printoutResults() {
+func (getInfo *getRecentTrackInformation) printoutResultsToTxt() {
 	f, err := os.Create("audioFeaturesTimeSeries_" + constants.Now.Format("20060102150405") + ".txt")
 	if err != nil {
 		log.Fatalf("failed creating file: %s", err)
@@ -196,6 +199,140 @@ func (getInfo *getRecentTrackInformation) printoutResults() {
 
 	_ = dataWriter.Flush()
 	_ = f.Close()
+}
+
+// Result
+func (getInfo *getRecentTrackInformation) printoutResultsWFHValenceComparison() {
+
+	// Calcuation vars -- pre pandemic
+	prePandemicMondayVarSum := 0
+	prePandemicMondayTracks := 0
+	prePandemicTuesdayVarSum := 0
+	prePandemicTuesdayTracks := 0
+	prePandemicWednesdayVarSum := 0
+	prePandemicWednesdayTracks := 0
+	prePandemicThursdayVarSum := 0
+	prePandemicThursdayTracks := 0
+	prePandemicFridayVarSum := 0
+	prePandemicFridayTracks := 0
+
+	// Calcuation vars -- pandemic
+	pandemicMondayVarSum := 0
+	pandemicMondayTracks := 0
+	pandemicTuesdayVarSum := 0
+	pandemicTuesdayTracks := 0
+	pandemicWednesdayVarSum := 0
+	pandemicWednesdayTracks := 0
+	pandemicThursdayVarSum := 0
+	pandemicThursdayTracks := 0
+	pandemicFridayVarSum := 0
+	pandemicFridayTracks := 0
+
+	for _, t := range getInfo.tracksForDuration {
+		// I only want dem weekday tracks
+		if t.ListenDate.Weekday() == 0 || t.ListenDate.Weekday() == 6 {
+			continue
+		}
+
+		// I only want dem work hour tracks 10 AM - 6 PM
+		if t.ListenDate.Hour() < 10 || t.ListenDate.Hour() > 18 {
+			continue
+		}
+
+		// An audio feature id is required
+		if af, ok := getInfo.audioFeatures[t.SpotifyID]; !ok || af == nil {
+			continue
+		}
+
+		wantedValue := int(getInfo.audioFeatures[t.SpotifyID].Valence * 100.00)
+
+		if t.ListenDate.Before(constants.WFHStartDay) {
+			if t.ListenDate.Weekday() == 1 {
+				prePandemicMondayVarSum += wantedValue
+				prePandemicMondayTracks++
+			} else if t.ListenDate.Weekday() == 2 {
+				prePandemicTuesdayVarSum += wantedValue
+				prePandemicTuesdayTracks++
+			} else if t.ListenDate.Weekday() == 3 {
+				prePandemicWednesdayVarSum += wantedValue
+				prePandemicWednesdayTracks++
+			} else if t.ListenDate.Weekday() == 4 {
+				prePandemicThursdayVarSum += wantedValue
+				prePandemicThursdayTracks++
+			} else if t.ListenDate.Weekday() == 5 {
+				prePandemicFridayVarSum += wantedValue
+				prePandemicFridayTracks++
+			}
+		} else {
+			if t.ListenDate.Weekday() == 1 {
+				pandemicMondayVarSum += wantedValue
+				pandemicMondayTracks++
+			} else if t.ListenDate.Weekday() == 2 {
+				pandemicTuesdayVarSum += wantedValue
+				pandemicTuesdayTracks++
+			} else if t.ListenDate.Weekday() == 3 {
+				pandemicWednesdayVarSum += wantedValue
+				pandemicWednesdayTracks++
+			} else if t.ListenDate.Weekday() == 4 {
+				pandemicThursdayVarSum += wantedValue
+				pandemicThursdayTracks++
+			} else if t.ListenDate.Weekday() == 5 {
+				pandemicFridayVarSum += wantedValue
+				pandemicFridayTracks++
+			}
+		}
+	}
+
+	bar := charts.NewBar()
+	bar.SetGlobalOptions(
+		charts.WithColorsOpts(opts.Colors{"#bbbbbb", "#88c442"}),
+		charts.WithTitleOpts(
+			opts.Title{Title: "Valence of Tracks During the Workday: Before and During the Pandemic"},
+		),
+	)
+
+	bar.SetXAxis([]string{"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"}).
+		AddSeries(
+			"Pre-pandemic",
+			[]opts.BarData{
+				{
+					Value: prePandemicMondayVarSum / prePandemicMondayTracks,
+				},
+				{
+					Value: prePandemicTuesdayVarSum / prePandemicTuesdayTracks,
+				},
+				{
+					Value: prePandemicWednesdayVarSum / prePandemicWednesdayTracks,
+				},
+				{
+					Value: prePandemicThursdayVarSum / prePandemicThursdayTracks,
+				},
+				{
+					Value: prePandemicFridayVarSum / prePandemicFridayTracks,
+				},
+			}).
+		AddSeries(
+			"Pandemic",
+			[]opts.BarData{
+				{
+					Value: pandemicMondayVarSum / pandemicMondayTracks,
+				},
+				{
+					Value: pandemicTuesdayVarSum / pandemicTuesdayTracks,
+				},
+				{
+					Value: pandemicWednesdayVarSum / pandemicWednesdayTracks,
+				},
+				{
+					Value: pandemicThursdayVarSum / pandemicThursdayTracks,
+				},
+				{
+					Value: pandemicFridayVarSum / pandemicFridayTracks,
+				},
+			})
+
+	f, _ := os.Create("bar.html")
+	bar.Render(f)
 }
 
 func compareMultipleReturnedTracks(localTrack models.Track, searchTracks []spotify.FullTrack) spotify.ID {
