@@ -6,4 +6,3 @@ spotify*.json
 audioFeaturesTimeSeries_*.txt
 .DS_Store
 .run/Template Go Build.run.xml
-*.html
