@@ -69,10 +69,10 @@ func (handler *spotifyHandler) GetTrackRecommendations(attrStats *models.Attribu
 	trackAttrs.TargetAcousticness(attrStats.Acousticness.Median)
 	trackAttrs.TargetDanceability(attrStats.Danceability.Median)
 	trackAttrs.TargetEnergy(attrStats.Energy.Median)
-	//trackAttrs.TargetInstrumentalness(attrStats.Instrumentalness.Median)
-	//trackAttrs.TargetLiveness(attrStats.Liveness.Median)
+	trackAttrs.TargetInstrumentalness(attrStats.Instrumentalness.Median)
+	trackAttrs.TargetLiveness(attrStats.Liveness.Median)
 	trackAttrs.TargetLoudness(attrStats.Loudness.Median)
-	//trackAttrs.TargetSpeechiness(attrStats.Speechiness.Median)
+	trackAttrs.TargetSpeechiness(attrStats.Speechiness.Median)
 	trackAttrs.TargetTempo(attrStats.Tempo.Median)
 	trackAttrs.TargetValence(attrStats.Valence.Median)
 
