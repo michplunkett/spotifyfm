@@ -2,7 +2,7 @@ package projects
 
 import (
 	"fmt"
-
+	"github.com/michplunkett/spotifyfm/api/endpoints"
 	"github.com/michplunkett/spotifyfm/models"
 )
 
@@ -11,38 +11,45 @@ type AudioFeatureProcessing interface {
 }
 
 type audioFeatureProcessing struct {
-	audioFeatures []*models.TrackAudioFeatures
-	fileName      string
+	audioFeatures  []*models.TrackAudioFeatures
+	fileName       string
+	spotifyHandler endpoints.SpotifyHandler
 }
 
-func NewAudioFeatureProcessing(fileName string) AudioFeatureProcessing {
+func NewAudioFeatureProcessing(fileName string, spotifyHandler endpoints.SpotifyHandler) AudioFeatureProcessing {
 	return &audioFeatureProcessing{
-		audioFeatures: make([]*models.TrackAudioFeatures, 0),
-		fileName:      fileName,
+		audioFeatures:  make([]*models.TrackAudioFeatures, 0),
+		fileName:       fileName,
+		spotifyHandler: spotifyHandler,
 	}
 }
 
 func (a *audioFeatureProcessing) Execute() {
 	a.parseInformationFromFile()
+	a.getRecommendedTracks()
 }
 
 func (a *audioFeatureProcessing) parseInformationFromFile() {
 	a.audioFeatures = append(a.audioFeatures, models.GetTrackAudioFeatures(a.fileName)...)
+}
+
+func (a *audioFeatureProcessing) getRecommendedTracks() {
 	// Get stats for Monday between 9-6
 	mondayWork := a.getValuesBetweenDayAndTime(1, 9, 18)
-	fmt.Println(mondayWork.Acousticness.Median)
+	// Get recommended tracks for mondayWork
+	fmt.Println(a.spotifyHandler.GetTrackRecommendations(mondayWork, "house", 20))
 }
 
 func (a *audioFeatureProcessing) getValuesBetweenDayAndTime(day, startHour, endHour int) *models.AttributeStats {
-	acousticness := make([]float32, 0)
-	danceability := make([]float32, 0)
-	energy := make([]float32, 0)
-	instrumentalness := make([]float32, 0)
-	liveness := make([]float32, 0)
-	loudness := make([]float32, 0)
-	speechiness := make([]float32, 0)
-	tempo := make([]float32, 0)
-	valence := make([]float32, 0)
+	acousticness := make([]float64, 0)
+	danceability := make([]float64, 0)
+	energy := make([]float64, 0)
+	instrumentalness := make([]float64, 0)
+	liveness := make([]float64, 0)
+	loudness := make([]float64, 0)
+	speechiness := make([]float64, 0)
+	tempo := make([]float64, 0)
+	valence := make([]float64, 0)
 
 	for _, t := range a.audioFeatures {
 		if int(t.ListenDate.Weekday()) == day && t.ListenDate.Hour() >= startHour && t.ListenDate.Hour() <= endHour {

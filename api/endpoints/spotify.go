@@ -15,7 +15,7 @@ type SpotifyHandler interface {
 	GetAllTopTracks(timeRange string) []spotify.FullTrack
 	GetAudioFeaturesOfTrack(trackIDs []spotify.ID) []*spotify.AudioFeatures
 	GetCurrentlyPlaying() *spotify.CurrentlyPlaying
-	GetTrackRecommendations(totalTracks int, attrStats *models.AttributeStats) *spotify.Recommendations
+	GetTrackRecommendations(attrStats *models.AttributeStats, seedGenre string, totalTracks int) *spotify.Recommendations
 	GetUserInfo() *spotify.PrivateUser
 	SearchForSong(songName, albumName, artistName string) ([]spotify.FullTrack, error)
 }
@@ -64,19 +64,23 @@ func (handler *spotifyHandler) GetCurrentlyPlaying() *spotify.CurrentlyPlaying {
 	return currentlyPlaying
 }
 
-func (handler *spotifyHandler) GetTrackRecommendations(totalTracks int, attrStats *models.AttributeStats) *spotify.Recommendations {
+func (handler *spotifyHandler) GetTrackRecommendations(attrStats *models.AttributeStats, seedGenre string, totalTracks int) *spotify.Recommendations {
 	trackAttrs := *spotify.NewTrackAttributes()
 	trackAttrs.TargetAcousticness(attrStats.Acousticness.Median)
 	trackAttrs.TargetDanceability(attrStats.Danceability.Median)
 	trackAttrs.TargetEnergy(attrStats.Energy.Median)
-	trackAttrs.TargetInstrumentalness(attrStats.Instrumentalness.Median)
-	trackAttrs.TargetLiveness(attrStats.Liveness.Median)
+	//trackAttrs.TargetInstrumentalness(attrStats.Instrumentalness.Median)
+	//trackAttrs.TargetLiveness(attrStats.Liveness.Median)
 	trackAttrs.TargetLoudness(attrStats.Loudness.Median)
-	trackAttrs.TargetSpeechiness(attrStats.Speechiness.Median)
+	//trackAttrs.TargetSpeechiness(attrStats.Speechiness.Median)
 	trackAttrs.TargetTempo(attrStats.Tempo.Median)
 	trackAttrs.TargetValence(attrStats.Valence.Median)
 
-	recTracks, _ := handler.client.GetRecommendations(spotify.Seeds{}, &trackAttrs, &spotify.Options{
+	seeds := spotify.Seeds{
+		Genres: []string{seedGenre},
+	}
+
+	recTracks, _ := handler.client.GetRecommendations(seeds, &trackAttrs, &spotify.Options{
 		Limit: &totalTracks,
 	})
 	return recTracks

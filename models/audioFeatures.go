@@ -16,17 +16,17 @@ type TrackAudioFeatures struct {
 	Name             string
 	Album            string
 	Artist           string
-	Duration         float32
+	Duration         float64
 	SpotifyID        string
-	Acousticness     float32
-	Danceability     float32
-	Energy           float32
-	Instrumentalness float32
-	Liveness         float32
-	Loudness         float32
-	Speechiness      float32
-	Tempo            float32
-	Valence          float32
+	Acousticness     float64
+	Danceability     float64
+	Energy           float64
+	Instrumentalness float64
+	Liveness         float64
+	Loudness         float64
+	Speechiness      float64
+	Tempo            float64
+	Valence          float64
 }
 
 func GetTrackAudioFeatures(fileName string) []*TrackAudioFeatures {
@@ -66,39 +66,39 @@ func audioFeatureTextLineToDomain(featureString string) *TrackAudioFeatures {
 	}
 
 	listenDate, _ := time.Parse(time.RFC3339, f[0])
-	duration, _ := strconv.ParseFloat(f[4], 32)
-	acousticness, _ := strconv.ParseFloat(f[6], 32)
-	danceability, _ := strconv.ParseFloat(f[7], 32)
-	energy, _ := strconv.ParseFloat(f[8], 32)
-	instrumentalness, _ := strconv.ParseFloat(f[9], 32)
-	liveness, _ := strconv.ParseFloat(f[10], 32)
-	loudness, _ := strconv.ParseFloat(f[11], 32)
-	speechiness, _ := strconv.ParseFloat(f[12], 32)
-	tempo, _ := strconv.ParseFloat(f[13], 32)
-	valence, _ := strconv.ParseFloat(f[14], 32)
+	duration, _ := strconv.ParseFloat(f[4], 64)
+	acousticness, _ := strconv.ParseFloat(f[6], 64)
+	danceability, _ := strconv.ParseFloat(f[7], 64)
+	energy, _ := strconv.ParseFloat(f[8], 64)
+	instrumentalness, _ := strconv.ParseFloat(f[9], 64)
+	liveness, _ := strconv.ParseFloat(f[10], 64)
+	loudness, _ := strconv.ParseFloat(f[11], 64)
+	speechiness, _ := strconv.ParseFloat(f[12], 64)
+	tempo, _ := strconv.ParseFloat(f[13], 64)
+	valence, _ := strconv.ParseFloat(f[14], 64)
 	return &TrackAudioFeatures{
 		ListenDate:       listenDate,
 		Name:             f[1],
 		Album:            f[2],
 		Artist:           f[3],
-		Duration:         float32(duration),
+		Duration:         duration,
 		SpotifyID:        f[5],
-		Acousticness:     float32(acousticness),
-		Danceability:     float32(danceability),
-		Energy:           float32(energy),
-		Instrumentalness: float32(instrumentalness),
-		Liveness:         float32(liveness),
-		Loudness:         float32(loudness),
-		Speechiness:      float32(speechiness),
-		Tempo:            float32(tempo),
-		Valence:          float32(valence),
+		Acousticness:     acousticness,
+		Danceability:     danceability,
+		Energy:           energy,
+		Instrumentalness: instrumentalness,
+		Liveness:         liveness,
+		Loudness:         loudness,
+		Speechiness:      speechiness,
+		Tempo:            tempo,
+		Valence:          valence,
 	}
 }
 
 type BasicStats struct {
-	Max    float32
-	Median float32
-	Min    float32
+	Max    float64
+	Median float64
+	Min    float64
 }
 
 type AttributeStats struct {
@@ -113,7 +113,7 @@ type AttributeStats struct {
 	Valence          *BasicStats
 }
 
-func BuildBasicStats(attr []float32) *BasicStats {
+func BuildBasicStats(attr []float64) *BasicStats {
 	sort.SliceStable(attr, func(i, j int) bool { return attr[i] < attr[j] })
 	sliceLen := len(attr)
 

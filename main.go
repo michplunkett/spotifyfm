@@ -42,5 +42,5 @@ func main() {
 
 	//projects.NewArtistsTrackVsTime(lastFMHandler, constants.LastFMPeriod3Month, lastFMUser.Name).Execute()
 	//projects.NewGetRecentTrackInformation(constants.StartOf2021, lastFMHandler, spotifyHandler).Execute()
-	projects.NewAudioFeatureProcessing("audioFeaturesTimeSeries_20210527112333.txt").Execute()
+	projects.NewAudioFeatureProcessing("audioFeaturesTimeSeries_20210527112333.txt", spotifyHandler).Execute()
 }
