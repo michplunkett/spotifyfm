@@ -42,7 +42,7 @@ func NewGetRecentTrackInformation(fromDate int64, lastFMHandler endpoints.LastFM
 func (getInfo *getRecentTrackInformation) Execute() {
 	getInfo.getInformation()
 	getInfo.printoutResultsToTxt()
-	getInfo.printoutResultsWFHValenceComparison()
+	//getInfo.printoutResultsWFHValenceComparison()
 }
 
 func (getInfo *getRecentTrackInformation) getInformation() {
@@ -204,7 +204,7 @@ func (getInfo *getRecentTrackInformation) printoutResultsToTxt() {
 // Result
 func (getInfo *getRecentTrackInformation) printoutResultsWFHValenceComparison() {
 
-	// Calcuation vars -- pre pandemic
+	// Calculation vars -- pre pandemic
 	prePandemicMondayVarSum := 0
 	prePandemicMondayTracks := 0
 	prePandemicTuesdayVarSum := 0
@@ -216,7 +216,7 @@ func (getInfo *getRecentTrackInformation) printoutResultsWFHValenceComparison() 
 	prePandemicFridayVarSum := 0
 	prePandemicFridayTracks := 0
 
-	// Calcuation vars -- pandemic
+	// Calculation vars -- pandemic
 	pandemicMondayVarSum := 0
 	pandemicMondayTracks := 0
 	pandemicTuesdayVarSum := 0
