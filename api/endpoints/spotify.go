@@ -2,6 +2,8 @@ package endpoints
 
 import (
 	"github.com/zmb3/spotify"
+
+	"github.com/michplunkett/spotifyfm/models"
 )
 
 const (
@@ -13,6 +15,7 @@ type SpotifyHandler interface {
 	GetAllTopTracks(timeRange string) []spotify.FullTrack
 	GetAudioFeaturesOfTrack(trackIDs []spotify.ID) []*spotify.AudioFeatures
 	GetCurrentlyPlaying() *spotify.CurrentlyPlaying
+	GetTrackRecommendations(totalTracks int, attrStats *models.AttributeStats) *spotify.Recommendations
 	GetUserInfo() *spotify.PrivateUser
 	SearchForSong(songName, albumName, artistName string) ([]spotify.FullTrack, error)
 }
@@ -59,6 +62,24 @@ func (handler *spotifyHandler) GetAudioFeaturesOfTrack(trackIDs []spotify.ID) []
 func (handler *spotifyHandler) GetCurrentlyPlaying() *spotify.CurrentlyPlaying {
 	currentlyPlaying, _ := handler.client.PlayerCurrentlyPlaying()
 	return currentlyPlaying
+}
+
+func (handler *spotifyHandler) GetTrackRecommendations(totalTracks int, attrStats *models.AttributeStats) *spotify.Recommendations {
+	trackAttrs := *spotify.NewTrackAttributes()
+	trackAttrs.TargetAcousticness(attrStats.Acousticness.Median)
+	trackAttrs.TargetDanceability(attrStats.Danceability.Median)
+	trackAttrs.TargetEnergy(attrStats.Energy.Median)
+	trackAttrs.TargetInstrumentalness(attrStats.Instrumentalness.Median)
+	trackAttrs.TargetLiveness(attrStats.Liveness.Median)
+	trackAttrs.TargetLoudness(attrStats.Loudness.Median)
+	trackAttrs.TargetSpeechiness(attrStats.Speechiness.Median)
+	trackAttrs.TargetTempo(attrStats.Tempo.Median)
+	trackAttrs.TargetValence(attrStats.Valence.Median)
+
+	recTracks, _ := handler.client.GetRecommendations(spotify.Seeds{}, &trackAttrs, &spotify.Options{
+		Limit: &totalTracks,
+	})
+	return recTracks
 }
 
 func (handler *spotifyHandler) GetUserInfo() *spotify.PrivateUser {
