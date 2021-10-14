@@ -41,6 +41,7 @@ func NewSpotifyAuthHandlerAll(e environment.EnvVars) SpotifyAuthHandler {
 	var permissions = make([]string, 0)
 	permissions = append(permissions, spotify.ScopeUserFollowRead,
 		spotify.ScopeUserReadPrivate, spotify.ScopeUserReadEmail,
+		spotify.ScopePlaylistModifyPrivate, spotify.ScopePlaylistModifyPublic,
 		spotify.ScopePlaylistReadPrivate, spotify.ScopePlaylistReadCollaborative,
 		spotify.ScopeUserLibraryRead, spotify.ScopeUserTopRead,
 		spotify.ScopeUserReadRecentlyPlayed, spotify.ScopeUserReadCurrentlyPlaying)
