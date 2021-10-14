@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/michplunkett/spotifyfm/api"
 	"github.com/michplunkett/spotifyfm/api/authentication"
 	"github.com/michplunkett/spotifyfm/api/endpoints"
@@ -40,7 +41,7 @@ func main() {
 	lastFMUser := lastFMHandler.GetUserInfo()
 	fmt.Println("You are logged in as ", lastFMUser.RealName)
 
-	//projects.NewArtistsTrackVsTime(lastFMHandler, constants.LastFMPeriod3Month, lastFMUser.Name).Execute()
+	//projects.NewArtistsTrackVsTime(lastFMHandler, constants.LastFMPeriod6Month, lastFMUser.Name).Execute()
 	//projects.NewGetRecentTrackInformation(constants.StartOf2021, lastFMHandler, spotifyHandler).Execute()
-	projects.NewAudioFeatureProcessing("audioFeaturesTimeSeries_20210527112333.txt", spotifyHandler).Execute()
+	projects.NewAudioFeatureProcessing("audioFeaturesTimeSeries_20211014115400.txt", spotifyHandler).Execute()
 }
