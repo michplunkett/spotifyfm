@@ -1,6 +1,8 @@
 package endpoints
 
 import (
+	"fmt"
+
 	"github.com/zmb3/spotify"
 
 	"github.com/michplunkett/spotifyfm/models"
@@ -11,6 +13,7 @@ const (
 )
 
 type SpotifyHandler interface {
+	CreatePlaylistAndAddTracks(name, description string, recs []spotify.ID)
 	GetAllTopArtists(timeRange string) []spotify.FullArtist
 	GetAllTopTracks(timeRange string) []spotify.FullTrack
 	GetAudioFeaturesOfTrack(trackIDs []spotify.ID) []*spotify.AudioFeatures
@@ -27,6 +30,21 @@ type spotifyHandler struct {
 func NewSpotifyHandler(client *spotify.Client) *spotifyHandler {
 	return &spotifyHandler{
 		client: client,
+	}
+}
+
+func (handler *spotifyHandler) CreatePlaylistAndAddTracks(name, description string, recs []spotify.ID) {
+	userInfo := handler.GetUserInfo()
+	playList, err := handler.client.CreatePlaylistForUser(userInfo.ID, name, description, false)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	_, err = handler.client.AddTracksToPlaylist(playList.ID, recs...)
+	if err != nil {
+		fmt.Println(err)
+		return
 	}
 }
 
