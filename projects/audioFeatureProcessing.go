@@ -1,7 +1,8 @@
 package projects
 
 import (
-	"fmt"
+	"github.com/zmb3/spotify"
+
 	"github.com/michplunkett/spotifyfm/api/endpoints"
 	"github.com/michplunkett/spotifyfm/models"
 )
@@ -34,13 +35,18 @@ func (a *audioFeatureProcessing) parseInformationFromFile() {
 }
 
 func (a *audioFeatureProcessing) getRecommendedTracks() {
-	// Get stats for Monday between 9-6
-	mondayWork := a.getValuesBetweenDayAndTime(1, 9, 18)
+	// Get stats for weekdays between 9-6
+	work := a.getValuesBetweenTimeWeekdays(9, 18)
 	// Get recommended tracks for mondayWork
-	fmt.Println(a.spotifyHandler.GetTrackRecommendations(mondayWork, "house", 20))
+	recs := a.spotifyHandler.GetTrackRecommendations(work, "hardcore", 30)
+	recIds := make([]spotify.ID, 0)
+	for _, track := range recs.Tracks {
+		recIds = append(recIds, track.ID)
+	}
+	a.spotifyHandler.CreatePlaylistAndAddTracks("Work Hardcore Mix", "", recIds)
 }
 
-func (a *audioFeatureProcessing) getValuesBetweenDayAndTime(day, startHour, endHour int) *models.AttributeStats {
+func (a *audioFeatureProcessing) getValuesBetweenTimeWeekdays(startHour, endHour int) *models.AttributeStats {
 	acousticness := make([]float64, 0)
 	danceability := make([]float64, 0)
 	energy := make([]float64, 0)
@@ -52,7 +58,8 @@ func (a *audioFeatureProcessing) getValuesBetweenDayAndTime(day, startHour, endH
 	valence := make([]float64, 0)
 
 	for _, t := range a.audioFeatures {
-		if int(t.ListenDate.Weekday()) == day && t.ListenDate.Hour() >= startHour && t.ListenDate.Hour() <= endHour {
+		if int(t.ListenDate.Weekday()) != 0 && int(t.ListenDate.Weekday()) != 6 &&
+			t.ListenDate.Hour() >= startHour && t.ListenDate.Hour() <= endHour {
 			acousticness = append(acousticness, t.Acousticness)
 			danceability = append(danceability, t.Danceability)
 			energy = append(energy, t.Energy)
