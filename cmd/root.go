@@ -1,11 +1,11 @@
 package cmd
 
 import (
-	"github.com/michplunkett/spotifyfm/api/endpoints"
 	"github.com/spf13/cobra"
+
+	"github.com/michplunkett/spotifyfm/api/endpoints"
 )
 
-//projects.NewGetRecentTrackInformation(constants.StartOf2021, lastFMHandler, spotifyHandler).Execute()
 //projects.NewAudioFeatureProcessing("audioFeaturesTimeSeries_20211014115400.txt", spotifyHandler).Execute()
 
 type Root struct {
@@ -19,11 +19,15 @@ func NewRootCmd(lastFMHandler endpoints.LastFMHandler, spotifyHandler endpoints.
 	}
 
 	for cmd, subcommands := range map[*cobra.Command][]*cobra.Command{
-		NewBothCmd(): nil,
+		NewBothCmd(): {
+			NewRecentTrackInformationCmd(lastFMHandler, spotifyHandler),
+		},
 		NewLastFMCmd(): {
 			NewTrackVsTimeCmd(lastFMHandler),
 		},
-		NewSpotifymd(): nil,
+		NewSpotifymd(): {
+			NewAudioFeatureProcessing(spotifyHandler),
+		},
 	} {
 		// add subcommands to their parent
 		for _, subcmd := range subcommands {
