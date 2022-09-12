@@ -6,8 +6,6 @@ import (
 	"github.com/michplunkett/spotifyfm/api/endpoints"
 )
 
-//projects.NewAudioFeatureProcessing("audioFeaturesTimeSeries_20211014115400.txt", spotifyHandler).Execute()
-
 type Root struct {
 	cmd *cobra.Command
 }

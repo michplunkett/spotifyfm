@@ -10,11 +10,12 @@ import (
 
 	"github.com/go-echarts/go-echarts/v2/charts"
 	"github.com/go-echarts/go-echarts/v2/opts"
+	"github.com/spf13/cobra"
+	"github.com/zmb3/spotify"
+
 	"github.com/michplunkett/spotifyfm/api/endpoints"
 	"github.com/michplunkett/spotifyfm/models"
 	"github.com/michplunkett/spotifyfm/util/constants"
-	"github.com/spf13/cobra"
-	"github.com/zmb3/spotify"
 )
 
 func NewBothCmd() *cobra.Command {

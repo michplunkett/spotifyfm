@@ -3,10 +3,11 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/michplunkett/spotifyfm/api/endpoints"
-	"github.com/michplunkett/spotifyfm/models"
 	"github.com/spf13/cobra"
 	"github.com/zmb3/spotify"
+
+	"github.com/michplunkett/spotifyfm/api/endpoints"
+	"github.com/michplunkett/spotifyfm/models"
 )
 
 func NewSpotifymd() *cobra.Command {
