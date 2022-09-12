@@ -39,22 +39,22 @@ func NewGetRecentTrackInformation(fromDate int64, lastFMHandler endpoints.LastFM
 	}
 }
 
-func (getInfo *getRecentTrackInformation) Execute() {
-	getInfo.getInformation()
-	getInfo.printoutResultsToTxt()
-	//getInfo.printoutResultsWFHValenceComparison()
+func (c *getRecentTrackInformation) Execute() {
+	c.getInformation()
+	c.printoutResultsToTxt()
+	//c.printoutResultsWFHValenceComparison()
 }
 
-func (getInfo *getRecentTrackInformation) getInformation() {
-	getInfo.tracksForDuration = getInfo.lastFMHandler.GetAllRecentTracks(getInfo.fromDate, getInfo.lastFMHandler.GetUserInfo().Name)
+func (c *getRecentTrackInformation) getInformation() {
+	c.tracksForDuration = c.lastFMHandler.GetAllRecentTracks(c.fromDate, c.lastFMHandler.GetUserInfo().Name)
 	fmt.Println("-----------------------------")
-	fmt.Println("There are this many tracks: ", len(getInfo.tracksForDuration))
+	fmt.Println("There are this many tracks: ", len(c.tracksForDuration))
 	nonCachedTrackIDs := make([]spotify.ID, 0)
 	couldNotFindInSearch := 0
 	couldNotMatchInSearch := 0
 	trackToIDHash := models.GetSpotifySearchToSongIDs()
-	for i := 0; i < len(getInfo.tracksForDuration); {
-		t := getInfo.tracksForDuration[i]
+	for i := 0; i < len(c.tracksForDuration); {
+		t := c.tracksForDuration[i]
 		if i != 0 && i%5000 == 0 {
 			fmt.Println("5 second search sleep")
 			fmt.Println("Search index: ", i)
@@ -65,16 +65,16 @@ func (getInfo *getRecentTrackInformation) getInformation() {
 		if value, ok := trackToIDHash[searchKey]; ok {
 			if value != constants.NotFound {
 				t.SpotifyID = value
-				getInfo.tracksForDuration[i] = t
+				c.tracksForDuration[i] = t
 			} else {
 				t.SpotifyID = constants.NotFound
-				getInfo.tracksForDuration[i] = t
+				c.tracksForDuration[i] = t
 			}
 			i += 1
 			continue
 		}
 
-		searchResult, err := getInfo.spotifyHandler.SearchForSong(t.Artist, t.AlbumName, t.Name)
+		searchResult, err := c.spotifyHandler.SearchForSong(t.Artist, t.AlbumName, t.Name)
 		if err != nil {
 			fmt.Println("5 second search error sleep")
 			fmt.Println("Search error index: ", i)
@@ -86,25 +86,18 @@ func (getInfo *getRecentTrackInformation) getInformation() {
 			if comparisonResult != constants.EmptyString {
 				nonCachedTrackIDs = append(nonCachedTrackIDs, comparisonResult)
 				t.SpotifyID = comparisonResult
-				getInfo.tracksForDuration[i] = t
+				c.tracksForDuration[i] = t
 				trackToIDHash[searchKey] = comparisonResult
 			} else {
-				//fmt.Println("--- Count not match in search ---")
-				//fmt.Println("index: ", i)
-				//fmt.Println("search string: " + searchKey)
-				//fmt.Println(searchResult)
 				t.SpotifyID = constants.NotFound
 				trackToIDHash[searchKey] = constants.NotFound
-				getInfo.tracksForDuration[i] = t
+				c.tracksForDuration[i] = t
 				couldNotMatchInSearch += 1
 			}
 		} else {
-			//fmt.Println("--- Count not find in search ---")
-			//fmt.Println("index: ", i)
-			//fmt.Println("search string: " + searchKey)
 			t.SpotifyID = constants.NotFound
 			trackToIDHash[searchKey] = constants.NotFound
-			getInfo.tracksForDuration[i] = t
+			c.tracksForDuration[i] = t
 			couldNotFindInSearch += 1
 		}
 		i += 1
@@ -114,7 +107,7 @@ func (getInfo *getRecentTrackInformation) getInformation() {
 	fmt.Println("-----------------------------")
 	fmt.Println("Could not match in search: ", couldNotMatchInSearch)
 	fmt.Println("Could not find in search: ", couldNotFindInSearch)
-	fmt.Println("Total tracks: ", len(getInfo.tracksForDuration))
+	fmt.Println("Total tracks: ", len(c.tracksForDuration))
 	fmt.Println("10 refresh sleep")
 	time.Sleep(10 * time.Second)
 	fmt.Println("-----------------------------")
@@ -124,10 +117,10 @@ func (getInfo *getRecentTrackInformation) getInformation() {
 		if upperLimit > len(nonCachedTrackIDs) {
 			upperLimit = len(nonCachedTrackIDs)
 		}
-		audioFeatures := getInfo.spotifyHandler.GetAudioFeaturesOfTrack(nonCachedTrackIDs[i:upperLimit])
+		audioFeatures := c.spotifyHandler.GetAudioFeaturesOfTrack(nonCachedTrackIDs[i:upperLimit])
 		for _, a := range audioFeatures {
-			if _, ok := getInfo.audioFeatures[a.ID]; !ok {
-				getInfo.audioFeatures[a.ID] = a
+			if _, ok := c.audioFeatures[a.ID]; !ok {
+				c.audioFeatures[a.ID] = a
 			}
 		}
 		if i != 0 && i%1000 == 0 {
@@ -137,16 +130,16 @@ func (getInfo *getRecentTrackInformation) getInformation() {
 		}
 		i += 50
 	}
-	if _, ok := getInfo.audioFeatures[constants.NotFound]; !ok {
-		getInfo.audioFeatures[constants.NotFound] = nil
+	if _, ok := c.audioFeatures[constants.NotFound]; !ok {
+		c.audioFeatures[constants.NotFound] = nil
 	}
-	models.AddSpotifyIDToAudioFeatures(getInfo.audioFeatures)
+	models.AddSpotifyIDToAudioFeatures(c.audioFeatures)
 
 	fmt.Println("-----------------------------")
 	fmt.Println("Searched for this many track IDs: ", len(nonCachedTrackIDs))
 }
 
-func (getInfo *getRecentTrackInformation) printoutResultsToTxt() {
+func (c *getRecentTrackInformation) printoutResultsToTxt() {
 	f, err := os.Create("audioFeaturesTimeSeries_" + constants.Now.Format("20060102150405") + ".txt")
 	if err != nil {
 		log.Fatalf("failed creating file: %s", err)
@@ -154,8 +147,8 @@ func (getInfo *getRecentTrackInformation) printoutResultsToTxt() {
 	dataWriter := bufio.NewWriter(f)
 
 	_, _ = dataWriter.WriteString("ListenDate\tTrack\tAlbum\tArtist\tDuration(S)\tSpotifyID\tAcousticness\tDanceability\tEnergy\tInstrumentalness\tLiveness\tLoudness\tSpeechiness\tTempo\tValence\n")
-	for _, t := range getInfo.tracksForDuration {
-		af := getInfo.audioFeatures[t.SpotifyID]
+	for _, t := range c.tracksForDuration {
+		af := c.audioFeatures[t.SpotifyID]
 
 		if af == nil {
 			continue
@@ -198,11 +191,10 @@ func (getInfo *getRecentTrackInformation) printoutResultsToTxt() {
 	}
 
 	_ = dataWriter.Flush()
-	_ = f.Close()
 }
 
 // Result
-func (getInfo *getRecentTrackInformation) printoutResultsWFHValenceComparison() {
+func (c *getRecentTrackInformation) printoutResultsWFHValenceComparison() {
 
 	// Calculation vars -- pre pandemic
 	prePandemicMondayVarSum := 0
@@ -228,7 +220,7 @@ func (getInfo *getRecentTrackInformation) printoutResultsWFHValenceComparison() 
 	pandemicFridayVarSum := 0
 	pandemicFridayTracks := 0
 
-	for _, t := range getInfo.tracksForDuration {
+	for _, t := range c.tracksForDuration {
 		// I only want dem weekday tracks
 		if t.ListenDate.Weekday() == 0 || t.ListenDate.Weekday() == 6 {
 			continue
@@ -240,11 +232,11 @@ func (getInfo *getRecentTrackInformation) printoutResultsWFHValenceComparison() 
 		}
 
 		// An audio feature id is required
-		if af, ok := getInfo.audioFeatures[t.SpotifyID]; !ok || af == nil {
+		if af, ok := c.audioFeatures[t.SpotifyID]; !ok || af == nil {
 			continue
 		}
 
-		wantedValue := int(getInfo.audioFeatures[t.SpotifyID].Valence * 100.00)
+		wantedValue := int(c.audioFeatures[t.SpotifyID].Valence * 100.00)
 
 		if t.ListenDate.Before(constants.WFHStartDay) {
 			if t.ListenDate.Weekday() == 1 {
