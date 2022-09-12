@@ -9,7 +9,8 @@ import (
 	"github.com/michplunkett/spotifyfm/util/constants"
 )
 
-// EnvironmentVariableController will handle creating and handling all fo the configs
+// EnvironmentVariableController will handle creating and handling all of the configs
+
 type EnvVars interface {
 	GetLastFMApiKey() string
 	GetLastFMSharedSecret() string
