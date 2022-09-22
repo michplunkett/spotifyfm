@@ -11,6 +11,13 @@ import (
 	"github.com/michplunkett/spotifyfm/util/constants"
 )
 
+var (
+	durationSort []models.Artist
+	lastFMSort   []models.Artist
+	timeSpan     = constants.LastFMPeriod6Month
+	tracks       []models.Track
+)
+
 func NewLastFMCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "lastfm",
@@ -28,31 +35,26 @@ func NewTrackVsTimeCmd(handler endpoints.LastFMHandler) *cobra.Command {
 			return nil
 		},
 		Run: func(cmd *cobra.Command, args []string) {
-			var (
-				durationSort []models.Artist
-				lastFMSort   []models.Artist
-				timeSpan     = constants.LastFMPeriod6Month
-				tracks       []models.Track
-			)
-
 			fmt.Println("Starting the comparison process...")
-			getInformation(handler, lastFMSort, timeSpan, tracks)
-			doCalculations(durationSort, lastFMSort, tracks)
-			printoutResults(durationSort, lastFMSort)
+			getInformation(handler, timeSpan)
+			fmt.Println(durationSort)
+			fmt.Println(lastFMSort)
+			doCalculations()
+			printoutResults()
 		},
 	}
 
 	return cmd
 }
 
-func getInformation(handler endpoints.LastFMHandler, lastFMSortedArtists []models.Artist, timeSpan string, tracks []models.Track) {
+func getInformation(handler endpoints.LastFMHandler, timeSpan string) {
 	userName := handler.GetUserInfo().Name
 	tracks = handler.GetAllTopTracks(timeSpan, userName)
-	lastFMSortedArtists = handler.GetAllTopArtists(timeSpan, userName)
+	lastFMSort = handler.GetAllTopArtists(timeSpan, userName)
 
 	// UUIDs are mapped to their respective artist's lower case name.
 	artistNameToUUIDHash := make(map[string]string, 0)
-	for _, artist := range lastFMSortedArtists {
+	for _, artist := range lastFMSort {
 		if _, ok := artistNameToUUIDHash[artist.LowerCaseName]; !ok && artist.UUID != constants.EmptyString {
 			artistNameToUUIDHash[artist.LowerCaseName] = artist.UUID
 		}
@@ -79,7 +81,7 @@ func getInformation(handler endpoints.LastFMHandler, lastFMSortedArtists []model
 	}
 }
 
-func doCalculations(durationSort, lastFMSort []models.Artist, tracks []models.Track) {
+func doCalculations() {
 	// Create a hash mapping an artist's UUID to its track duration sum.
 	artistsDurationHash := make(map[string]int, 0)
 	for _, artist := range lastFMSort {
@@ -112,7 +114,7 @@ func doCalculations(durationSort, lastFMSort []models.Artist, tracks []models.Tr
 
 }
 
-func printoutResults(durationSort, lastFMSort []models.Artist) {
+func printoutResults() {
 	// I'd like a better way for visualising this, but this will have to do for right now.
 	fmt.Println("---TOP 20 ARTISTS BY TRACKS LISTENED VS TIME LISTENED---")
 	fmt.Printf("Rank\tArtist(Tracks)\tTrack Listens\tArtist(Time)\tMinutes Listened\n")
