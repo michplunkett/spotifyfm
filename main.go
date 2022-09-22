@@ -38,5 +38,5 @@ func main() {
 	lastFMUser := lastFMHandler.GetUserInfo()
 	fmt.Println("You are logged in as ", lastFMUser.RealName)
 
-	cmd.NewRootCmd(lastFMHandler, spotifyHandler)
+	cmd.NewRootCmd(lastFMHandler, spotifyHandler).Execute()
 }

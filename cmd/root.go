@@ -1,6 +1,9 @@
 package cmd
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/spf13/cobra"
 
 	"github.com/michplunkett/spotifyfm/api/endpoints"
@@ -37,4 +40,11 @@ func NewRootCmd(lastFMHandler endpoints.LastFMHandler, spotifyHandler endpoints.
 	}
 
 	return &Root{cmd: root}
+}
+
+func (r *Root) Execute() {
+	if err := r.cmd.Execute(); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 }
