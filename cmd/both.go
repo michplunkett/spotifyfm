@@ -74,9 +74,9 @@ func getRecentTrackInformation(fromDate int64, lastFMHandler endpoints.LastFMHan
 
 		searchResult, err := spotifyHandler.SearchForSong(t.Artist, t.AlbumName, t.Name)
 		if err != nil {
-			fmt.Println("5 second search error sleep")
+			fmt.Println("30 second search error sleep")
 			fmt.Println("Search error index: ", i)
-			time.Sleep(5 * time.Second)
+			time.Sleep(30 * time.Second)
 			continue
 		}
 		if searchResult != nil {
@@ -123,9 +123,9 @@ func getRecentTrackInformation(fromDate int64, lastFMHandler endpoints.LastFMHan
 			}
 		}
 		if i != 0 && i%1000 == 0 {
-			fmt.Println("5 second audio feature sleep")
+			fmt.Println("30 second audio feature sleep")
 			fmt.Println("AudioFeatures index: ", i)
-			time.Sleep(5 * time.Second)
+			time.Sleep(30 * time.Second)
 		}
 		i += 50
 	}
