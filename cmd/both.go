@@ -106,8 +106,8 @@ func getRecentTrackInformation(fromDate int64, lastFMHandler endpoints.LastFMHan
 	fmt.Println("Could not match in search: ", couldNotMatchInSearch)
 	fmt.Println("Could not find in search: ", couldNotFindInSearch)
 	fmt.Println("Total tracks: ", len(tracksForDuration))
-	fmt.Println("10 refresh sleep")
-	time.Sleep(10 * time.Second)
+	fmt.Println("15 refresh sleep")
+	time.Sleep(15 * time.Second)
 	fmt.Println("-----------------------------")
 
 	audioFeatures := make(map[spotify.ID]*spotify.AudioFeatures)
