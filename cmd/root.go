@@ -31,8 +31,8 @@ func NewRootCmd(lastFMHandler endpoints.LastFMHandler, spotifyHandler endpoints.
 		},
 	} {
 		// add subcommands to their parent
-		for _, subcmd := range subcommands {
-			cmd.AddCommand(subcmd)
+		for _, subCmd := range subcommands {
+			cmd.AddCommand(subCmd)
 		}
 
 		// add parent command to the root
