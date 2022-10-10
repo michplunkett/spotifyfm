@@ -13,11 +13,10 @@ type Root struct {
 	cmd *cobra.Command
 }
 
-
-
 func NewRootCmd(lastFMHandler endpoints.LastFMHandler, spotifyHandler endpoints.SpotifyHandler) *Root {
 	var rootCmd = &cobra.Command{
 		Use:   "spotifyfm",
+		Version: "0.0.1",
 		Short: "SpotifyFM is a CLI application designed to compare Spotify and Last.fm calculations",
 	}
 
