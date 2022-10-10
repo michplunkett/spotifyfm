@@ -13,8 +13,10 @@ type Root struct {
 	cmd *cobra.Command
 }
 
+
+
 func NewRootCmd(lastFMHandler endpoints.LastFMHandler, spotifyHandler endpoints.SpotifyHandler) *Root {
-	root := &cobra.Command{
+	var rootCmd = &cobra.Command{
 		Use:   "spotifyfm",
 		Short: "SpotifyFM is a CLI application designed to compare Spotify and Last.fm calculations",
 	}
@@ -36,10 +38,10 @@ func NewRootCmd(lastFMHandler endpoints.LastFMHandler, spotifyHandler endpoints.
 		}
 
 		// add parent command to the root
-		root.AddCommand(cmd)
+		rootCmd.AddCommand(cmd)
 	}
 
-	return &Root{cmd: root}
+	return &Root{cmd: rootCmd}
 }
 
 func (r *Root) Execute() {
