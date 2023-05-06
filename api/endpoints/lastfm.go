@@ -2,6 +2,7 @@ package endpoints
 
 import (
 	"fmt"
+
 	"github.com/shkh/lastfm-go/lastfm"
 
 	"github.com/michplunkett/spotifyfm/models"
