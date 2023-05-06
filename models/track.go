@@ -15,8 +15,9 @@ import (
 )
 
 const (
-	songIDsFileName           = "spotifySearchStringToSongID.json"
 	songAudioFeaturesFileName = "spotifyIDToAudioFeature.json"
+	songListFileName          = "lastFMTrackListing.json"
+	songIDsFileName           = "spotifySearchStringToSongID.json"
 )
 
 type Track struct {
@@ -140,5 +141,5 @@ func AddSpotifyIDToAudioFeatures(idToAudioFeatures map[spotify.ID]*spotify.Audio
 
 func AddLastFMTrackList(tracks []Track) {
 	file, _ := json.MarshalIndent(tracks, "", " ")
-	_ = ioutil.WriteFile(songAudioFeaturesFileName, file, 0644)
+	_ = ioutil.WriteFile(songListFileName, file, 0644)
 }
