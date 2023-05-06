@@ -123,7 +123,6 @@ func getRecentTrackInformation(fromDate int64, lastFMHandler endpoints.LastFMHan
 		if i != 0 && i%1000 == 0 {
 			sleepPrint(30, "Spotify audio feature search")
 			fmt.Println("AudioFeatures index: ", i)
-			time.Sleep(30 * time.Second)
 		}
 		i += 50
 	}
