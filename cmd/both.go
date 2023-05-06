@@ -74,7 +74,7 @@ func getRecentTrackInformation(fromDate int64, lastFMHandler endpoints.LastFMHan
 
 		searchResult, err := spotifyHandler.SearchForSong(t.Artist, t.AlbumName, t.Name)
 		if err != nil {
-			sleepPrint(30, "Spotify song search")
+			sleepPrint(5, "Spotify song search")
 			fmt.Printf("Search error index: %d\n", i)
 			continue
 		}
