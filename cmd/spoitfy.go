@@ -1,52 +1,60 @@
-package projects
+package cmd
 
 import (
+	"fmt"
+
+	"github.com/spf13/cobra"
 	"github.com/zmb3/spotify"
 
 	"github.com/michplunkett/spotifyfm/api/endpoints"
 	"github.com/michplunkett/spotifyfm/models"
 )
 
-type AudioFeatureProcessing interface {
-	Execute()
-}
-
-type audioFeatureProcessing struct {
-	audioFeatures  []*models.TrackAudioFeatures
-	fileName       string
-	spotifyHandler endpoints.SpotifyHandler
-}
-
-func NewAudioFeatureProcessing(fileName string, spotifyHandler endpoints.SpotifyHandler) AudioFeatureProcessing {
-	return &audioFeatureProcessing{
-		audioFeatures:  make([]*models.TrackAudioFeatures, 0),
-		fileName:       fileName,
-		spotifyHandler: spotifyHandler,
+func NewSpotifymd() *cobra.Command {
+	return &cobra.Command{
+		Use:   "spotify",
+		Short: "Runs Spotify subcommands.",
 	}
 }
 
-func (a *audioFeatureProcessing) Execute() {
-	a.parseInformationFromFile()
-	a.getRecommendedTracks()
+func NewAudioFeatureProcessing(spotifyHandler endpoints.SpotifyHandler) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "audio-feature-processing",
+		Short: "Gets recent track information by combining information from LastFM and Spotify.",
+		Args: func(cmd *cobra.Command, args []string) error {
+			return nil
+		},
+		Run: func(cmd *cobra.Command, args []string) {
+			var (
+				fileName = "audioFeaturesTimeSeries_20211014115400.txt"
+			)
+
+			fmt.Println("Starting the audio feature processing...")
+			audioFeatures := parseInformationFromFile(fileName)
+			getRecommendedTracks(audioFeatures, spotifyHandler)
+		},
+	}
+
+	return cmd
 }
 
-func (a *audioFeatureProcessing) parseInformationFromFile() {
-	a.audioFeatures = append(a.audioFeatures, models.GetTrackAudioFeatures(a.fileName)...)
+func parseInformationFromFile(fileName string) []*models.TrackAudioFeatures {
+	return models.GetTrackAudioFeatures(fileName)
 }
 
-func (a *audioFeatureProcessing) getRecommendedTracks() {
+func getRecommendedTracks(features []*models.TrackAudioFeatures, spotifyHandler endpoints.SpotifyHandler) {
 	// Get stats for weekdays between 9-6
-	work := a.getValuesBetweenTimeWeekdays(9, 18)
+	work := getValuesBetweenTimeWeekdays(features, 9, 18)
 	// Get recommended tracks for mondayWork
-	recs := a.spotifyHandler.GetTrackRecommendations(work, "hardcore", 30)
+	recs := spotifyHandler.GetTrackRecommendations(work, "hardcore", 30)
 	recIds := make([]spotify.ID, 0)
 	for _, track := range recs.Tracks {
 		recIds = append(recIds, track.ID)
 	}
-	a.spotifyHandler.CreatePlaylistAndAddTracks("Work Hardcore Mix", "", recIds)
+	spotifyHandler.CreatePlaylistAndAddTracks("Work Hardcore Mix", "", recIds)
 }
 
-func (a *audioFeatureProcessing) getValuesBetweenTimeWeekdays(startHour, endHour int) *models.AttributeStats {
+func getValuesBetweenTimeWeekdays(features []*models.TrackAudioFeatures, startHour, endHour int) *models.AttributeStats {
 	acousticness := make([]float64, 0)
 	danceability := make([]float64, 0)
 	energy := make([]float64, 0)
@@ -57,7 +65,7 @@ func (a *audioFeatureProcessing) getValuesBetweenTimeWeekdays(startHour, endHour
 	tempo := make([]float64, 0)
 	valence := make([]float64, 0)
 
-	for _, t := range a.audioFeatures {
+	for _, t := range features {
 		if int(t.ListenDate.Weekday()) != 0 && int(t.ListenDate.Weekday()) != 6 &&
 			t.ListenDate.Hour() >= startHour && t.ListenDate.Hour() <= endHour {
 			acousticness = append(acousticness, t.Acousticness)

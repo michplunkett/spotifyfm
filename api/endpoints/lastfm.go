@@ -1,6 +1,8 @@
 package endpoints
 
 import (
+	"fmt"
+
 	"github.com/shkh/lastfm-go/lastfm"
 
 	"github.com/michplunkett/spotifyfm/models"
@@ -28,6 +30,7 @@ func NewLastFMHandler(api *lastfm.Api) LastFMHandler {
 func (handler *lastFMHandler) GetAllRecentTracks(from int64, userName string) []models.Track {
 	tracks := make([]models.Track, 0)
 
+	totalTracksFetched := 0
 	page := 1
 	for {
 		topTracks := handler.getRecentTracks(from, constants.APIObjectLimit, page, userName)
@@ -37,7 +40,11 @@ func (handler *lastFMHandler) GetAllRecentTracks(from int64, userName string) []
 		if len(domainTracks) < constants.APIObjectLimit {
 			break
 		}
-		page = page + 1
+		page += 1
+		totalTracksFetched += len(domainTracks)
+		if totalTracksFetched%1000 == 0 {
+			fmt.Printf("You have fetched %d tracks from Last.FM.\n", totalTracksFetched)
+		}
 	}
 	return tracks
 }
