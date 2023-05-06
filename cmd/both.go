@@ -34,9 +34,8 @@ func NewRecentTrackInformationCmd(lastFMHandler endpoints.LastFMHandler, spotify
 		},
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Println("Starting the recent track fetching process...")
-			tracksForDuration, audioFeatures := getRecentTrackInformation(constants.StartOf2015, lastFMHandler, spotifyHandler)
+			tracksForDuration, audioFeatures := getRecentTrackInformation(constants.StartOfThisMonth, lastFMHandler, spotifyHandler)
 			printoutResultsToTxt(tracksForDuration, audioFeatures)
-			//printoutResultsWFHValenceComparison(tracksForDuration, audioFeatures)
 		},
 	}
 
@@ -56,9 +55,8 @@ func getRecentTrackInformation(fromDate int64, lastFMHandler endpoints.LastFMHan
 	for i := 0; i < len(tracksForDuration); {
 		t := tracksForDuration[i]
 		if i != 0 && i%5000 == 0 {
-			fmt.Println("5 second search sleep")
-			fmt.Println("Search index: ", i)
-			time.Sleep(5 * time.Second)
+			sleepPrint(5, "Spotify search to ID")
+			fmt.Printf("Search index: %d\n", i)
 		}
 
 		searchKey := t.Artist + " " + t.AlbumName + " " + t.Name
@@ -76,9 +74,8 @@ func getRecentTrackInformation(fromDate int64, lastFMHandler endpoints.LastFMHan
 
 		searchResult, err := spotifyHandler.SearchForSong(t.Artist, t.AlbumName, t.Name)
 		if err != nil {
-			fmt.Println("30 second search error sleep")
-			fmt.Println("Search error index: ", i)
-			time.Sleep(30 * time.Second)
+			sleepPrint(30, "Spotify song search")
+			fmt.Printf("Search error index: %d\n", i)
 			continue
 		}
 		if searchResult != nil {
@@ -105,11 +102,10 @@ func getRecentTrackInformation(fromDate int64, lastFMHandler endpoints.LastFMHan
 	models.AddSpotifySearchToSongIDs(trackToIDHash)
 
 	fmt.Println("-----------------------------")
-	fmt.Println("Could not match in search: ", couldNotMatchInSearch)
-	fmt.Println("Could not find in search: ", couldNotFindInSearch)
-	fmt.Println("Total tracks: ", len(tracksForDuration))
-	fmt.Println("15 refresh sleep")
-	time.Sleep(15 * time.Second)
+	fmt.Printf("Could not match in search: %d\n", couldNotMatchInSearch)
+	fmt.Printf("Could not find in search: %d\n", couldNotFindInSearch)
+	fmt.Printf("Total tracks: %d\n", len(tracksForDuration))
+	sleepPrint(15, "break between hitting the APIs")
 	fmt.Println("-----------------------------")
 
 	audioFeatures := make(map[spotify.ID]*spotify.AudioFeatures)
@@ -125,7 +121,7 @@ func getRecentTrackInformation(fromDate int64, lastFMHandler endpoints.LastFMHan
 			}
 		}
 		if i != 0 && i%1000 == 0 {
-			fmt.Println("30 second audio feature sleep")
+			sleepPrint(30, "Spotify audio feature search")
 			fmt.Println("AudioFeatures index: ", i)
 			time.Sleep(30 * time.Second)
 		}
@@ -337,4 +333,9 @@ func compareMultipleReturnedTracks(localTrack models.Track, searchTracks []spoti
 		}
 	}
 	return constants.EmptyString
+}
+
+func sleepPrint(duration int, message string) {
+	fmt.Printf("%d second %s sleep", duration, message)
+	time.Sleep(time.Duration(duration) * time.Second)
 }
