@@ -137,3 +137,8 @@ func AddSpotifyIDToAudioFeatures(idToAudioFeatures map[spotify.ID]*spotify.Audio
 	file, _ := json.MarshalIndent(idToAudioFeatures, "", " ")
 	_ = ioutil.WriteFile(songAudioFeaturesFileName, file, 0644)
 }
+
+func AddLastFMTrackList(tracks []Track) {
+	file, _ := json.MarshalIndent(tracks, "", " ")
+	_ = ioutil.WriteFile(songAudioFeaturesFileName, file, 0644)
+}

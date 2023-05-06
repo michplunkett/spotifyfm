@@ -45,11 +45,13 @@ func NewRecentTrackInformationCmd(lastFMHandler endpoints.LastFMHandler, spotify
 
 func getRecentTrackInformation(fromDate int64, lastFMHandler endpoints.LastFMHandler, spotifyHandler endpoints.SpotifyHandler) ([]models.Track, map[spotify.ID]*spotify.AudioFeatures) {
 	tracksForDuration := lastFMHandler.GetAllRecentTracks(fromDate, lastFMHandler.GetUserInfo().Name)
+	models.AddLastFMTrackList(tracksForDuration)
 	fmt.Println("-----------------------------")
 	fmt.Println("There are this many tracks: ", len(tracksForDuration))
 	nonCachedTrackIDs := make([]spotify.ID, 0)
 	couldNotFindInSearch := 0
 	couldNotMatchInSearch := 0
+
 	trackToIDHash := models.GetSpotifySearchToSongIDs()
 	for i := 0; i < len(tracksForDuration); {
 		t := tracksForDuration[i]
