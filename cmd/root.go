@@ -15,9 +15,9 @@ type Root struct {
 
 func NewRootCmd(lastFMHandler endpoints.LastFMHandler, spotifyHandler endpoints.SpotifyHandler) *Root {
 	var rootCmd = &cobra.Command{
-		Use:   "spotifyfm",
+		Use:     "spotifyfm",
 		Version: "0.0.1",
-		Short: "SpotifyFM is a CLI application designed to compare Spotify and Last.fm calculations",
+		Short:   "SpotifyFM is a CLI application designed to compare Spotify and Last.fm calculations",
 	}
 
 	for cmd, subcommands := range map[*cobra.Command][]*cobra.Command{
