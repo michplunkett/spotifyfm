@@ -18,7 +18,7 @@ import (
 	"github.com/michplunkett/spotifyfm/util/constants"
 )
 
-const MAX_RETRIES = 6
+const MaxRetries = 6
 
 func NewBothCmd() *cobra.Command {
 	return &cobra.Command{
@@ -36,7 +36,7 @@ func NewRecentTrackInformationCmd(lastFMHandler endpoints.LastFMHandler, spotify
 		},
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Println("Starting the recent track fetching process...")
-			tracksForDuration, audioFeatures := getRecentTrackInformation(constants.StartOf2020, lastFMHandler, spotifyHandler)
+			tracksForDuration, audioFeatures := getRecentTrackInformation(constants.StartOf2022, lastFMHandler, spotifyHandler)
 			printoutResultsToTxt(tracksForDuration, audioFeatures)
 		},
 	}
@@ -78,7 +78,7 @@ func getRecentTrackInformation(fromDate int64, lastFMHandler endpoints.LastFMHan
 		}
 
 		searchResult, err := spotifyHandler.SearchForSong(t.Artist, t.AlbumName, t.Name)
-		if err != nil && spotifyAPICallForTrack < MAX_RETRIES {
+		if err != nil && spotifyAPICallForTrack < MaxRetries {
 			fmt.Println(searchKey)
 			fmt.Println(err.Error())
 			sleepPrint(10, "Spotify song search")
@@ -130,6 +130,9 @@ func getRecentTrackInformation(fromDate int64, lastFMHandler endpoints.LastFMHan
 		}
 		features := spotifyHandler.GetAudioFeaturesOfTrack(nonCachedTrackIDs[i:upperLimit])
 		for _, a := range features {
+			if a == nil {
+				continue
+			}
 			if _, ok := audioFeatures[a.ID]; !ok {
 				audioFeatures[a.ID] = a
 			}
