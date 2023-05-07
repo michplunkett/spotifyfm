@@ -34,6 +34,8 @@ var (
 		"th1rt3en": "thirteen",
 	}
 	Now              = time.Now()
+	StartOf2023      = time.Date(2023, time.January, 1, 0, 0, 0, 0, Now.Location()).Unix()
+	StartOf2022      = time.Date(2022, time.January, 1, 0, 0, 0, 0, Now.Location()).Unix()
 	StartOf2021      = time.Date(2021, time.January, 1, 0, 0, 0, 0, Now.Location()).Unix()
 	StartOf2020      = time.Date(2020, time.January, 1, 0, 0, 0, 0, Now.Location()).Unix()
 	StartOf2019      = time.Date(2019, time.January, 1, 0, 0, 0, 0, Now.Location()).Unix()

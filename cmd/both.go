@@ -18,6 +18,8 @@ import (
 	"github.com/michplunkett/spotifyfm/util/constants"
 )
 
+const MaxRetries = 6
+
 func NewBothCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "both",
@@ -34,7 +36,7 @@ func NewRecentTrackInformationCmd(lastFMHandler endpoints.LastFMHandler, spotify
 		},
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Println("Starting the recent track fetching process...")
-			tracksForDuration, audioFeatures := getRecentTrackInformation(constants.StartOfThisMonth, lastFMHandler, spotifyHandler)
+			tracksForDuration, audioFeatures := getRecentTrackInformation(constants.StartOf2022, lastFMHandler, spotifyHandler)
 			printoutResultsToTxt(tracksForDuration, audioFeatures)
 		},
 	}
@@ -46,16 +48,18 @@ func getRecentTrackInformation(fromDate int64, lastFMHandler endpoints.LastFMHan
 	tracksForDuration := lastFMHandler.GetAllRecentTracks(fromDate, lastFMHandler.GetUserInfo().Name)
 	models.AddLastFMTrackList(tracksForDuration)
 	fmt.Println("-----------------------------")
-	fmt.Println("There are this many tracks: ", len(tracksForDuration))
+	fmt.Printf("There are this many tracks: %d\n", len(tracksForDuration))
 	nonCachedTrackIDs := make([]spotify.ID, 0)
 	couldNotFindInSearch := 0
 	couldNotMatchInSearch := 0
+	spotifyAPICallForTrack := 0
 
 	trackToIDHash := models.GetSpotifySearchToSongIDs()
 	for i := 0; i < len(tracksForDuration); {
 		t := tracksForDuration[i]
-		if i != 0 && i%5000 == 0 {
-			sleepPrint(5, "Spotify search to ID")
+		spotifyAPICallForTrack += 1
+		if i != 0 && i%10000 == 0 {
+			sleepPrint(10, "Spotify search to ID")
 			fmt.Printf("Search index: %d\n", i)
 		}
 
@@ -68,12 +72,15 @@ func getRecentTrackInformation(fromDate int64, lastFMHandler endpoints.LastFMHan
 				t.SpotifyID = constants.NotFound
 				tracksForDuration[i] = t
 			}
+			spotifyAPICallForTrack = 0
 			i += 1
 			continue
 		}
 
 		searchResult, err := spotifyHandler.SearchForSong(t.Artist, t.AlbumName, t.Name)
-		if err != nil {
+		if err != nil && spotifyAPICallForTrack < MaxRetries {
+			fmt.Println(searchKey)
+			fmt.Println(err.Error())
 			sleepPrint(5, "Spotify song search")
 			fmt.Printf("Search error index: %d\n", i)
 			continue
@@ -97,6 +104,8 @@ func getRecentTrackInformation(fromDate int64, lastFMHandler endpoints.LastFMHan
 			tracksForDuration[i] = t
 			couldNotFindInSearch += 1
 		}
+
+		spotifyAPICallForTrack = 0
 		i += 1
 	}
 	models.AddSpotifySearchToSongIDs(trackToIDHash)
@@ -105,34 +114,46 @@ func getRecentTrackInformation(fromDate int64, lastFMHandler endpoints.LastFMHan
 	fmt.Printf("Could not match in search: %d\n", couldNotMatchInSearch)
 	fmt.Printf("Could not find in search: %d\n", couldNotFindInSearch)
 	fmt.Printf("Total tracks: %d\n", len(tracksForDuration))
-	sleepPrint(10, "break between hitting the APIs")
 	fmt.Println("-----------------------------")
 
-	audioFeatures := make(map[spotify.ID]*spotify.AudioFeatures)
-	for i := 0; i < len(nonCachedTrackIDs); {
-		upperLimit := i + 50
-		if upperLimit > len(nonCachedTrackIDs) {
-			upperLimit = len(nonCachedTrackIDs)
+	audioFeatures := models.GetSpotifyIDToAudioFeatures()
+	audioFeaturesForSearch := make([]spotify.ID, 0)
+	for _, v := range trackToIDHash {
+		if _, ok := audioFeatures[v]; !ok {
+			audioFeaturesForSearch = append(audioFeaturesForSearch, v)
 		}
-		features := spotifyHandler.GetAudioFeaturesOfTrack(nonCachedTrackIDs[i:upperLimit])
+	}
+
+	fmt.Printf("This many tracks need audio features: %d\n", len(audioFeaturesForSearch))
+
+	for i := 0; i < len(audioFeaturesForSearch); {
+		var upperLimit int
+		if len(audioFeaturesForSearch) < i+50 {
+			upperLimit = len(audioFeaturesForSearch)
+		} else {
+			upperLimit = i + 50
+		}
+
+		features := spotifyHandler.GetAudioFeaturesOfTrack(audioFeaturesForSearch[i:upperLimit])
 		for _, a := range features {
+			if a == nil {
+				continue
+			}
 			if _, ok := audioFeatures[a.ID]; !ok {
 				audioFeatures[a.ID] = a
 			}
 		}
-		if i != 0 && i%1000 == 0 {
-			sleepPrint(30, "Spotify audio feature search")
+		if i != 0 && i%10000 == 0 {
+			sleepPrint(5, "Spotify audio feature search")
 			fmt.Println("AudioFeatures index: ", i)
 		}
 		i += 50
 	}
-	if _, ok := audioFeatures[constants.NotFound]; !ok {
-		audioFeatures[constants.NotFound] = nil
-	}
+	delete(audioFeatures, constants.NotFound)
 	models.AddSpotifyIDToAudioFeatures(audioFeatures)
 
 	fmt.Println("-----------------------------")
-	fmt.Println("Searched for this many track IDs: ", len(nonCachedTrackIDs))
+	fmt.Println("Searched for this many track IDs: ", len(audioFeaturesForSearch))
 
 	return tracksForDuration, audioFeatures
 }
@@ -335,6 +356,6 @@ func compareMultipleReturnedTracks(localTrack models.Track, searchTracks []spoti
 }
 
 func sleepPrint(duration int, message string) {
-	fmt.Printf("%d second %s sleep", duration, message)
+	fmt.Printf("%d second %s sleep\n", duration, message)
 	time.Sleep(time.Duration(duration) * time.Second)
 }

@@ -42,7 +42,7 @@ func (handler *lastFMHandler) GetAllRecentTracks(from int64, userName string) []
 		}
 		page += 1
 		totalTracksFetched += len(domainTracks)
-		if totalTracksFetched%1000 == 0 {
+		if totalTracksFetched%5000 == 0 {
 			fmt.Printf("You have fetched %d tracks from Last.FM.\n", totalTracksFetched)
 		}
 	}
