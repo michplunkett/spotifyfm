@@ -58,7 +58,7 @@ func getRecentTrackInformation(fromDate int64, lastFMHandler endpoints.LastFMHan
 	for i := 0; i < len(tracksForDuration); {
 		t := tracksForDuration[i]
 		spotifyAPICallForTrack += 1
-		if i != 0 && i%1000 == 0 {
+		if i != 0 && i%5000 == 0 {
 			sleepPrint(10, "Spotify search to ID")
 			fmt.Printf("Search index: %d\n", i)
 		}
@@ -116,7 +116,7 @@ func getRecentTrackInformation(fromDate int64, lastFMHandler endpoints.LastFMHan
 	fmt.Printf("Total tracks: %d\n", len(tracksForDuration))
 	fmt.Println("-----------------------------")
 
-	audioFeatures := make(map[spotify.ID]*spotify.AudioFeatures)
+	audioFeatures := models.GetSpotifyIDToAudioFeatures()
 	for i := 0; i < len(nonCachedTrackIDs); {
 		var upperLimit int
 		if len(nonCachedTrackIDs) < i+50 {
@@ -130,9 +130,6 @@ func getRecentTrackInformation(fromDate int64, lastFMHandler endpoints.LastFMHan
 		}
 		features := spotifyHandler.GetAudioFeaturesOfTrack(nonCachedTrackIDs[i:upperLimit])
 		for _, a := range features {
-			if a == nil {
-				continue
-			}
 			if _, ok := audioFeatures[a.ID]; !ok {
 				audioFeatures[a.ID] = a
 			}
