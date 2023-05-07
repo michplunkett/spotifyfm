@@ -18,6 +18,8 @@ import (
 	"github.com/michplunkett/spotifyfm/util/constants"
 )
 
+const MAX_RETRIES = 6
+
 func NewBothCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "both",
@@ -34,7 +36,7 @@ func NewRecentTrackInformationCmd(lastFMHandler endpoints.LastFMHandler, spotify
 		},
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Println("Starting the recent track fetching process...")
-			tracksForDuration, audioFeatures := getRecentTrackInformation(constants.StartOf2023, lastFMHandler, spotifyHandler)
+			tracksForDuration, audioFeatures := getRecentTrackInformation(constants.StartOf2020, lastFMHandler, spotifyHandler)
 			printoutResultsToTxt(tracksForDuration, audioFeatures)
 		},
 	}
@@ -50,12 +52,14 @@ func getRecentTrackInformation(fromDate int64, lastFMHandler endpoints.LastFMHan
 	nonCachedTrackIDs := make([]spotify.ID, 0)
 	couldNotFindInSearch := 0
 	couldNotMatchInSearch := 0
+	spotifyAPICallForTrack := 0
 
 	trackToIDHash := models.GetSpotifySearchToSongIDs()
 	for i := 0; i < len(tracksForDuration); {
 		t := tracksForDuration[i]
+		spotifyAPICallForTrack += 1
 		if i != 0 && i%1000 == 0 {
-			sleepPrint(5, "Spotify search to ID")
+			sleepPrint(10, "Spotify search to ID")
 			fmt.Printf("Search index: %d\n", i)
 		}
 
@@ -68,12 +72,15 @@ func getRecentTrackInformation(fromDate int64, lastFMHandler endpoints.LastFMHan
 				t.SpotifyID = constants.NotFound
 				tracksForDuration[i] = t
 			}
+			spotifyAPICallForTrack = 0
 			i += 1
 			continue
 		}
 
 		searchResult, err := spotifyHandler.SearchForSong(t.Artist, t.AlbumName, t.Name)
-		if err != nil {
+		if err != nil && spotifyAPICallForTrack < MAX_RETRIES {
+			fmt.Println(searchKey)
+			fmt.Println(err.Error())
 			sleepPrint(10, "Spotify song search")
 			fmt.Printf("Search error index: %d\n", i)
 			continue
@@ -97,6 +104,8 @@ func getRecentTrackInformation(fromDate int64, lastFMHandler endpoints.LastFMHan
 			tracksForDuration[i] = t
 			couldNotFindInSearch += 1
 		}
+
+		spotifyAPICallForTrack = 0
 		i += 1
 	}
 	models.AddSpotifySearchToSongIDs(trackToIDHash)
@@ -105,7 +114,6 @@ func getRecentTrackInformation(fromDate int64, lastFMHandler endpoints.LastFMHan
 	fmt.Printf("Could not match in search: %d\n", couldNotMatchInSearch)
 	fmt.Printf("Could not find in search: %d\n", couldNotFindInSearch)
 	fmt.Printf("Total tracks: %d\n", len(tracksForDuration))
-	sleepPrint(10, "break between hitting the APIs")
 	fmt.Println("-----------------------------")
 
 	audioFeatures := make(map[spotify.ID]*spotify.AudioFeatures)
