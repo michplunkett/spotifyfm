@@ -15,6 +15,7 @@ import (
 )
 
 const (
+	fileMode                  = 0644
 	songAudioFeaturesFileName = "spotifyIDToAudioFeature.json"
 	songListFileName          = "lastFMTrackListing.json"
 	songIDsFileName           = "spotifySearchStringToSongID.json"
@@ -118,7 +119,7 @@ func AddSpotifySearchToSongIDs(searchToID map[string]spotify.ID) {
 	}
 
 	file, _ := json.MarshalIndent(validSearches, "", " ")
-	_ = ioutil.WriteFile(songIDsFileName, file, 0644)
+	_ = ioutil.WriteFile(songIDsFileName, file, fileMode)
 }
 
 func GetSpotifyIDToAudioFeatures() map[spotify.ID]*spotify.AudioFeatures {
@@ -136,10 +137,10 @@ func GetSpotifyIDToAudioFeatures() map[spotify.ID]*spotify.AudioFeatures {
 
 func AddSpotifyIDToAudioFeatures(idToAudioFeatures map[spotify.ID]*spotify.AudioFeatures) {
 	file, _ := json.MarshalIndent(idToAudioFeatures, "", " ")
-	_ = ioutil.WriteFile(songAudioFeaturesFileName, file, 0644)
+	_ = ioutil.WriteFile(songAudioFeaturesFileName, file, fileMode)
 }
 
 func AddLastFMTrackList(tracks []Track) {
 	file, _ := json.MarshalIndent(tracks, "", " ")
-	_ = ioutil.WriteFile(songListFileName, file, 0644)
+	_ = ioutil.WriteFile(songListFileName, file, fileMode)
 }
