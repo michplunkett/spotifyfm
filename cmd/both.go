@@ -36,7 +36,7 @@ func NewRecentTrackInformationCmd(lastFMHandler endpoints.LastFMHandler, spotify
 		},
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Println("Starting the recent track fetching process...")
-			tracksForDuration, audioFeatures := getRecentTrackInformation(constants.StartOf2023, lastFMHandler, spotifyHandler)
+			tracksForDuration, audioFeatures := getRecentTrackInformation(constants.StartOf2022, lastFMHandler, spotifyHandler)
 			printoutResultsToTxt(tracksForDuration, audioFeatures)
 		},
 	}
