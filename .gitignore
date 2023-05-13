@@ -5,6 +5,7 @@ config.json
 spotify*.json
 audioFeaturesTimeSeries_*.txt
 lastFMTrackListing.json
+.ipynb_checkpoints
 
 .DS_Store
 .run/Template Go Build.run.xml
