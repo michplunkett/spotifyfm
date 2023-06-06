@@ -11,4 +11,7 @@ This application is a `Golang` CLI that is in a bit of a transient state. Since 
   - `LAST_FM_API_KEY`: The application ID created from the above web-API link.
   - `LAST_FM_SHARED_SECRET`: The application secret created from the above web-API link.
 
-## Steps to Run
+## Commands
+- `go run main.go spotifyfm lastfm`: Holds commands that use the Spotify endpoints.
+- `go run main.go spotifyfm spotify`: Holds commands that use the Last.FM endpoints.
+- `go run main.go spotifyfm both`: Holds commands that use both the Spotify and Last.FM endpoints.
