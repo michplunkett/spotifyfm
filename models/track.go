@@ -2,7 +2,7 @@ package models
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"os"
 	"regexp"
 	"strconv"
 	"strings"
@@ -100,7 +100,7 @@ func RemoveNonWordCharacters(name string) string {
 func GetSpotifySearchToSongIDs() map[string]spotify.ID {
 	searchToIDHash := make(map[string]spotify.ID, 0)
 
-	songIDFile, err := ioutil.ReadFile(songIDsFileName)
+	songIDFile, err := os.ReadFile(songIDsFileName)
 	if err != nil {
 		return searchToIDHash
 	}
@@ -119,13 +119,13 @@ func AddSpotifySearchToSongIDs(searchToID map[string]spotify.ID) {
 	}
 
 	file, _ := json.MarshalIndent(validSearches, "", " ")
-	_ = ioutil.WriteFile(songIDsFileName, file, fileMode)
+	_ = os.WriteFile(songIDsFileName, file, fileMode)
 }
 
 func GetSpotifyIDToAudioFeatures() map[spotify.ID]*spotify.AudioFeatures {
 	audioFeatures := make(map[spotify.ID]*spotify.AudioFeatures, 0)
 
-	songIDFile, err := ioutil.ReadFile(songAudioFeaturesFileName)
+	songIDFile, err := os.ReadFile(songAudioFeaturesFileName)
 	if err != nil {
 		return audioFeatures
 	}
@@ -137,10 +137,10 @@ func GetSpotifyIDToAudioFeatures() map[spotify.ID]*spotify.AudioFeatures {
 
 func AddSpotifyIDToAudioFeatures(idToAudioFeatures map[spotify.ID]*spotify.AudioFeatures) {
 	file, _ := json.MarshalIndent(idToAudioFeatures, "", " ")
-	_ = ioutil.WriteFile(songAudioFeaturesFileName, file, fileMode)
+	_ = os.WriteFile(songAudioFeaturesFileName, file, fileMode)
 }
 
 func AddLastFMTrackList(tracks []Track) {
 	file, _ := json.MarshalIndent(tracks, "", " ")
-	_ = ioutil.WriteFile(songListFileName, file, fileMode)
+	_ = os.WriteFile(songListFileName, file, fileMode)
 }

@@ -2,7 +2,7 @@ package models
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"os"
 	"time"
 )
 
@@ -26,7 +26,7 @@ type SpotifyConfigs struct {
 }
 
 func GetConfigValues() *FileConfigs {
-	configFile, _ := ioutil.ReadFile(configFileName)
+	configFile, _ := os.ReadFile(configFileName)
 
 	configInfo := FileConfigs{}
 	_ = json.Unmarshal(configFile, &configInfo)
@@ -40,5 +40,5 @@ func (config *FileConfigs) SetConfigValues() {
 
 func setConfigFileValues(configValues *FileConfigs) {
 	file, _ := json.MarshalIndent(configValues, "", " ")
-	_ = ioutil.WriteFile(configFileName, file, 0644)
+	_ = os.WriteFile(configFileName, file, 0644)
 }
