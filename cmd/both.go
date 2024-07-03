@@ -38,6 +38,7 @@ func NewRecentTrackInformationCmd(lastFMHandler endpoints.LastFMHandler, spotify
 			fmt.Println("Starting the recent track fetching process...")
 			tracksForDuration, audioFeatures := getRecentTrackInformation(constants.StartOf2022, lastFMHandler, spotifyHandler)
 			printoutResultsToTxt(tracksForDuration, audioFeatures)
+			printoutResultsWFHValenceComparison(tracksForDuration, audioFeatures)
 		},
 	}
 
@@ -49,7 +50,6 @@ func getRecentTrackInformation(fromDate int64, lastFMHandler endpoints.LastFMHan
 	models.AddLastFMTrackList(tracksForDuration)
 	fmt.Println("-----------------------------")
 	fmt.Printf("There are this many tracks: %d\n", len(tracksForDuration))
-	nonCachedTrackIDs := make([]spotify.ID, 0)
 	couldNotFindInSearch := 0
 	couldNotMatchInSearch := 0
 	spotifyAPICallForTrack := 0
@@ -88,7 +88,6 @@ func getRecentTrackInformation(fromDate int64, lastFMHandler endpoints.LastFMHan
 		if searchResult != nil {
 			comparisonResult := compareMultipleReturnedTracks(t, searchResult)
 			if comparisonResult != constants.EmptyString {
-				nonCachedTrackIDs = append(nonCachedTrackIDs, comparisonResult)
 				t.SpotifyID = comparisonResult
 				tracksForDuration[i] = t
 				trackToIDHash[searchKey] = comparisonResult
