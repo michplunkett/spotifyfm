@@ -10,7 +10,7 @@ import (
 	"github.com/michplunkett/spotifyfm/models"
 )
 
-func NewSpotifymd() *cobra.Command {
+func NewSpotifyCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:   "spotify",
 		Short: "Runs Spotify subcommands.",
