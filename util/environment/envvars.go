@@ -47,7 +47,7 @@ func NewEnvVars() EnvVars {
 		e.lastfmApiKey = lastFmEnvVars[0]
 		e.lastfmSharedSecret = lastFmEnvVars[1]
 	} else {
-		fmt.Errorf("one of the last.fm environment variables is not present in your system")
+		fmt.Println(fmt.Errorf("one of the last.fm environment variables is not present in your system"))
 	}
 
 	spotifyEnvVars := []string{os.Getenv(constants.SpotifyClientID), os.Getenv(constants.SpotifyClientSecret), os.Getenv(constants.SpotifyUserName)}
@@ -56,7 +56,7 @@ func NewEnvVars() EnvVars {
 		e.spotifyClientSecret = spotifyEnvVars[1]
 		e.spotifyUserName = spotifyEnvVars[2]
 	} else {
-		fmt.Errorf("one of the spotify environment variables is not present in your system")
+		fmt.Println(fmt.Errorf("one of the spotify environment variables is not present in your system"))
 	}
 
 	return &e

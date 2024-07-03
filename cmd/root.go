@@ -27,7 +27,7 @@ func NewRootCmd(lastFMHandler endpoints.LastFMHandler, spotifyHandler endpoints.
 		NewLastFMCmd(): {
 			NewTrackVsTimeCmd(lastFMHandler),
 		},
-		NewSpotifymd(): {
+		NewSpotifyCmd(): {
 			NewAudioFeatureProcessing(spotifyHandler),
 		},
 	} {
