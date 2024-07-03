@@ -35,8 +35,7 @@ func NewRecentTrackInformationCmd(lastFMHandler endpoints.LastFMHandler, spotify
 			return nil
 		},
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Println("Starting the recent track fetching process...")
-			tracksForDuration, audioFeatures := getRecentTrackInformation(constants.StartOf2022, lastFMHandler, spotifyHandler)
+			tracksForDuration, audioFeatures := getRecentTrackInformation(constants.StartOf2024, lastFMHandler, spotifyHandler)
 			printoutResultsToTxt(tracksForDuration, audioFeatures)
 			printoutResultsWFHValenceComparison(tracksForDuration, audioFeatures)
 		},
@@ -45,8 +44,9 @@ func NewRecentTrackInformationCmd(lastFMHandler endpoints.LastFMHandler, spotify
 	return cmd
 }
 
-func getRecentTrackInformation(fromDate int64, lastFMHandler endpoints.LastFMHandler, spotifyHandler endpoints.SpotifyHandler) ([]models.Track, map[spotify.ID]*spotify.AudioFeatures) {
-	tracksForDuration := lastFMHandler.GetAllRecentTracks(fromDate, lastFMHandler.GetUserInfo().Name)
+func getRecentTrackInformation(fromDate time.Time, lastFMHandler endpoints.LastFMHandler, spotifyHandler endpoints.SpotifyHandler) ([]models.Track, map[spotify.ID]*spotify.AudioFeatures) {
+	fmt.Printf("Starting the recent track fetching process with %s as the start date...", fromDate.Format("01-02-2006"))
+	tracksForDuration := lastFMHandler.GetAllRecentTracks(fromDate.Unix(), lastFMHandler.GetUserInfo().Name)
 	models.AddLastFMTrackList(tracksForDuration)
 	fmt.Println("-----------------------------")
 	fmt.Printf("There are this many tracks: %d\n", len(tracksForDuration))
