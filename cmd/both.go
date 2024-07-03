@@ -8,8 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/go-echarts/go-echarts/v2/charts"
-	"github.com/go-echarts/go-echarts/v2/opts"
 	"github.com/spf13/cobra"
 	"github.com/zmb3/spotify"
 
@@ -37,7 +35,6 @@ func NewRecentTrackInformationCmd(lastFMHandler endpoints.LastFMHandler, spotify
 		Run: func(cmd *cobra.Command, args []string) {
 			tracksForDuration, audioFeatures := getRecentTrackInformation(constants.StartOf2024, lastFMHandler, spotifyHandler)
 			printoutResultsToTxt(tracksForDuration, audioFeatures)
-			printoutResultsWFHValenceComparison(tracksForDuration, audioFeatures)
 		},
 	}
 
@@ -45,7 +42,7 @@ func NewRecentTrackInformationCmd(lastFMHandler endpoints.LastFMHandler, spotify
 }
 
 func getRecentTrackInformation(fromDate time.Time, lastFMHandler endpoints.LastFMHandler, spotifyHandler endpoints.SpotifyHandler) ([]models.Track, map[spotify.ID]*spotify.AudioFeatures) {
-	fmt.Printf("Starting the recent track fetching process with %s as the start date...", fromDate.Format("01-02-2006"))
+	fmt.Printf("Starting the recent track fetching process with %s as the start date...\n", fromDate.Format("01-02-2006"))
 	tracksForDuration := lastFMHandler.GetAllRecentTracks(fromDate.Unix(), lastFMHandler.GetUserInfo().Name)
 	models.AddLastFMTrackList(tracksForDuration)
 	fmt.Println("-----------------------------")
@@ -209,139 +206,6 @@ func printoutResultsToTxt(tracks []models.Track, features map[spotify.ID]*spotif
 	}
 
 	_ = dataWriter.Flush()
-}
-
-func printoutResultsWFHValenceComparison(tracks []models.Track, features map[spotify.ID]*spotify.AudioFeatures) {
-
-	// Calculation vars -- pre pandemic
-	prePandemicMondayVarSum := 0
-	prePandemicMondayTracks := 0
-	prePandemicTuesdayVarSum := 0
-	prePandemicTuesdayTracks := 0
-	prePandemicWednesdayVarSum := 0
-	prePandemicWednesdayTracks := 0
-	prePandemicThursdayVarSum := 0
-	prePandemicThursdayTracks := 0
-	prePandemicFridayVarSum := 0
-	prePandemicFridayTracks := 0
-
-	// Calculation vars -- pandemic
-	pandemicMondayVarSum := 0
-	pandemicMondayTracks := 0
-	pandemicTuesdayVarSum := 0
-	pandemicTuesdayTracks := 0
-	pandemicWednesdayVarSum := 0
-	pandemicWednesdayTracks := 0
-	pandemicThursdayVarSum := 0
-	pandemicThursdayTracks := 0
-	pandemicFridayVarSum := 0
-	pandemicFridayTracks := 0
-
-	for _, t := range tracks {
-		// I only want dem weekday tracks
-		if t.ListenDate.Weekday() == 0 || t.ListenDate.Weekday() == 6 {
-			continue
-		}
-
-		// I only want dem work hour tracks 10 AM - 6 PM
-		if t.ListenDate.Hour() < 10 || t.ListenDate.Hour() > 18 {
-			continue
-		}
-
-		// An audio feature id is required
-		if af, ok := features[t.SpotifyID]; !ok || af == nil {
-			continue
-		}
-
-		wantedValue := int(features[t.SpotifyID].Valence * 100.00)
-
-		if t.ListenDate.Before(constants.WFHStartDay) {
-			if t.ListenDate.Weekday() == 1 {
-				prePandemicMondayVarSum += wantedValue
-				prePandemicMondayTracks++
-			} else if t.ListenDate.Weekday() == 2 {
-				prePandemicTuesdayVarSum += wantedValue
-				prePandemicTuesdayTracks++
-			} else if t.ListenDate.Weekday() == 3 {
-				prePandemicWednesdayVarSum += wantedValue
-				prePandemicWednesdayTracks++
-			} else if t.ListenDate.Weekday() == 4 {
-				prePandemicThursdayVarSum += wantedValue
-				prePandemicThursdayTracks++
-			} else if t.ListenDate.Weekday() == 5 {
-				prePandemicFridayVarSum += wantedValue
-				prePandemicFridayTracks++
-			}
-		} else {
-			if t.ListenDate.Weekday() == 1 {
-				pandemicMondayVarSum += wantedValue
-				pandemicMondayTracks++
-			} else if t.ListenDate.Weekday() == 2 {
-				pandemicTuesdayVarSum += wantedValue
-				pandemicTuesdayTracks++
-			} else if t.ListenDate.Weekday() == 3 {
-				pandemicWednesdayVarSum += wantedValue
-				pandemicWednesdayTracks++
-			} else if t.ListenDate.Weekday() == 4 {
-				pandemicThursdayVarSum += wantedValue
-				pandemicThursdayTracks++
-			} else if t.ListenDate.Weekday() == 5 {
-				pandemicFridayVarSum += wantedValue
-				pandemicFridayTracks++
-			}
-		}
-	}
-
-	bar := charts.NewBar()
-	bar.SetGlobalOptions(
-		charts.WithColorsOpts(opts.Colors{"#bbbbbb", "#88c442"}),
-		charts.WithTitleOpts(
-			opts.Title{Title: "Valence of Tracks During the Workday: Before and During the Pandemic"},
-		),
-	)
-
-	bar.SetXAxis([]string{"Monday", "Tuesday", "Wednesday", "Thursday", "Friday"}).
-		AddSeries(
-			"Pre-pandemic",
-			[]opts.BarData{
-				{
-					Value: prePandemicMondayVarSum / prePandemicMondayTracks,
-				},
-				{
-					Value: prePandemicTuesdayVarSum / prePandemicTuesdayTracks,
-				},
-				{
-					Value: prePandemicWednesdayVarSum / prePandemicWednesdayTracks,
-				},
-				{
-					Value: prePandemicThursdayVarSum / prePandemicThursdayTracks,
-				},
-				{
-					Value: prePandemicFridayVarSum / prePandemicFridayTracks,
-				},
-			}).
-		AddSeries(
-			"Pandemic",
-			[]opts.BarData{
-				{
-					Value: pandemicMondayVarSum / pandemicMondayTracks,
-				},
-				{
-					Value: pandemicTuesdayVarSum / pandemicTuesdayTracks,
-				},
-				{
-					Value: pandemicWednesdayVarSum / pandemicWednesdayTracks,
-				},
-				{
-					Value: pandemicThursdayVarSum / pandemicThursdayTracks,
-				},
-				{
-					Value: pandemicFridayVarSum / pandemicFridayTracks,
-				},
-			})
-
-	f, _ := os.Create("bar.html")
-	bar.Render(f)
 }
 
 func compareMultipleReturnedTracks(localTrack models.Track, searchTracks []spotify.FullTrack) spotify.ID {
