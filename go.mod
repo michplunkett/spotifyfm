@@ -1,6 +1,7 @@
 module github.com/michplunkett/spotifyfm
 
 go 1.22
+toolchain go1.24.1
 
 require (
 	github.com/google/uuid v1.1.2
@@ -15,7 +16,7 @@ require (
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	golang.org/x/net v0.23.0 // indirect
+	golang.org/x/net v0.38.0 // indirect
 	google.golang.org/appengine v1.4.0 // indirect
 	google.golang.org/protobuf v1.33.0 // indirect
 )
